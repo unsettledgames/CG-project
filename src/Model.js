@@ -1,19 +1,16 @@
-class Model {
-    constructor() {
-        this.texture = -1;
-        this.vertexBuffer = undefined;
-        this.indexBuffer = undefined;
+class Object {
+
+    constructor(properties) {
+        this.localTransform = glMatrix.mat4.create();
+        this.globalTransform = glMatrix.mat4.create();
+        this.parent = undefined;
+
+        this.shader = properties.shader;
+        this.texture = properties.texture;
+        this.mesh = properties.mesh;
     }
 
-    setTexture(toSet) {
-        this.texture = toSet;
-    }
-
-    setVertexBuffer(toSet) {
-        this.vertexBuffer = toSet;
-    }
-
-    setIndexBuffer(toSet) {
-        this.indexBuffer = toSet;
+    addChild(child) {
+        child.parent = this;
     }
 }

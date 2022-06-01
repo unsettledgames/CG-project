@@ -1,19 +1,26 @@
 <html>
     <head>
-        <!--Libraries-->
-        
     </head>
 
     <body>
         <canvas id="canvas"></canvas>
 
+        <!--Libraries-->
         <script type="text/javascript" src="libs/gl-matrix.js"></script>
         <script type="text/javascript" src="libs/json_gpu_loader.js"></script>
+
+        <!--Shaders-->
+        <script type="text/javascript" src="assets/shaders/reflections.js"></script>
+        <script type="text/javascript" src="assets/shaders/uniform.js"></script>
+
+        <!--Models-->
+        <script type="text/javascript" src="assets/models/teapot.json"></script>
+        <script type="text/javascript" src="assets/models/lamp.json"></script>
 
         <!--Custom code-->
         <script type="text/javascript" src="./src/Texture.js"></script>
         <script type="text/javascript" src="./src/Shader.js"></script>
-        <script type="text/javascript" src="./src/Object.js"></script>
+        <script type="text/javascript" src="./src/Mesh.js"></script>
         <script type="text/javascript" src="./src/Model.js"></script>
         <script type="text/javascript" src="./src/Game.js"></script>
     </body>
