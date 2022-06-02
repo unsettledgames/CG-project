@@ -1,8 +1,7 @@
 class Shader {
-    constructor (gl, name) {
+    constructor (name) {
         // Load source
-        this.gl = gl;
-        this.programID = this.gl.createProgram();
+        this.programID = gl.createProgram();
 
         switch (name) {
             case "uniform":
@@ -23,14 +22,14 @@ class Shader {
     }
 
     compile() {
-        let vertShader = this.gl.createShader(this.gl.VERTEX_SHADER);
-        let fragShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+        let vertShader = gl.createShader(gl.VERTEX_SHADER);
+        let fragShader = gl.createShader(gl.FRAGMENT_SHADER);
 
-        this.gl.shaderSource(vertShader, this.vertSrc);
-        this.gl.shaderSource(fragShader, this.fragSrc);
+        gl.shaderSource(vertShader, this.vertSrc);
+        gl.shaderSource(fragShader, this.fragSrc);
 
-        this.gl.compileShader(vertShader);
-        this.gl.compileShader(fragShader);
+        gl.compileShader(vertShader);
+        gl.compileShader(fragShader);
 
         let compiled = gl.getShaderParameter(vertShader, gl.COMPILE_STATUS);
         if (!compiled) {
@@ -41,7 +40,7 @@ class Shader {
 
         compiled = gl.getShaderParameter(fragShader, gl.COMPILE_STATUS);
         if (!compiled) {
-            let compilationLog = gl.getShaderInfoLog(vertShader);
+            let compilationLog = gl.getShaderInfoLog(fragShader);
             console.log('Shader compiler log: ' + compilationLog);
             return;
         }
@@ -51,34 +50,38 @@ class Shader {
     }
 
     link() {
-        this.gl.attachShader(this.programID, this.vertShader)
-        this.gl.attachShader(this.programID, this.fragShader);
-        this.linkProgram(this.programID);
+        gl.attachShader(this.programID, this.vertShader)
+        gl.attachShader(this.programID, this.fragShader);
+        gl.linkProgram(this.programID);
     }
 
     use() {
-        this.gl.useProgram(this.programID);
+        gl.useProgram(this.programID);
     }
 
     setVec4(name, value) {
-        let location = this.gl.getUniformLocation(this.programID, name);
-        this.gl.uniform4v(location, value);
+        let location = gl.getUniformLocation(this.programID, name);
+        gl.uniform4v(location, value);
         getGLError();
     }
 
     setMat4(name, value) {
-        let location = this.gl.getUniformLocation(this.programID, name);
-        this.gl.uniformMatrix4fv(location, value);
+        let location = gl.getUniformLocation(this.programID, name);
+        gl.uniformMatrix4fv(location, value);
+        getGLError();
+    }
+
+    setInt(name, value) {
+        let location = gl.getUniformLocation(this.programID, name);
+        gl.uniform1i(location, value);
         getGLError();
     }
 
     setTexture(name, value) {
-        let location = this.gl.getUniformLocation(this.programID, name);
-        this.gl.uniform1i(location, value);
-        getGLError();
+        this.setInt(name, value);
     }
 
     unuse() {
-        this.gl.useProgram(0);
+        gl.useProgram(0);
     }
 }
