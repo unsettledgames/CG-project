@@ -1,4 +1,4 @@
-function getGLError(gl) {
+function getGLError() {
     let error = gl.getError();
     if (error == gl.NO_ERROR) {
         return false;

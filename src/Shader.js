@@ -1,5 +1,5 @@
 class Shader {
-    constructor (name) {
+    constructor (name, attributes) {
         // Load source
         this.programID = gl.createProgram();
 
@@ -11,6 +11,7 @@ class Shader {
             case "reflections":
                 this.fragSrc = reflectionsFrag;
                 this.vertSrc = reflectionsVert;
+                this.posIndex = 0;
                 break;
             default:
                 console.log("Shader ", name, " not supported");
@@ -18,6 +19,7 @@ class Shader {
         }
 
         this.compile();
+
         this.link();
     }
 
@@ -52,22 +54,34 @@ class Shader {
     link() {
         gl.attachShader(this.programID, this.vertShader)
         gl.attachShader(this.programID, this.fragShader);
+
+        gl.bindAttribLocation(this.programID, posIndex, "a_Position");
+        gl.bindAttribLocation(this.programID, texCoordsIndex, "a_TexCoords");
+        
         gl.linkProgram(this.programID);
+
+        let linked = gl.getProgramParameter(this.programID, gl.LINK_STATUS);
+        if (!linked) {
+            let linkLog = gl.getProgramInfoLog(this.programID);
+            console.log("Shader linking log: " + linkLog);
+            return;
+        }
     }
 
     use() {
         gl.useProgram(this.programID);
+        getGLError();
     }
 
     setVec4(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
-        gl.uniform4v(location, value);
+        gl.uniform4fv(location, value);
         getGLError();
     }
 
     setMat4(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
-        gl.uniformMatrix4fv(location, value);
+        gl.uniformMatrix4fv(location, false, value);
         getGLError();
     }
 

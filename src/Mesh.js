@@ -10,26 +10,29 @@ class Mesh {
         this.vertexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
       
         if(this.texCoords){
             this.texCoordsBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordsBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, this.texCoords, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
       
+        // TODO: use the right index here
         if(this.tangents){ 
             this.tangentsBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.tangentsBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, this.tangents, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
            
         if(this.normals){
             obj.normalBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
               
         this.indexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
