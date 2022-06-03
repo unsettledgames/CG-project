@@ -3,6 +3,7 @@ let uniformVert = `
 precision highp float;
 
 uniform mat4 u_ViewProjection;
+uniform mat4 u_ModelTransform;
 
 attribute vec3 a_Position;
 attribute vec2 a_TexCoords;
@@ -11,7 +12,7 @@ varying vec2 v_TexCoords;
 
 void main()
 {
-    gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+    gl_Position = u_ViewProjection * u_ModelTransform * vec4(a_Position, 1.0);
     v_TexCoords = a_TexCoords;
 }`;
 

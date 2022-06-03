@@ -1,8 +1,8 @@
 class Model {
 
     constructor(props) {
-        this.localTransform = glMatrix.mat4.create();
-        this.globalTransform = glMatrix.mat4.create();
+        this.localTransform = new Transform();
+        this.globalTransform = this.localTransform;
         this.parent = undefined;
 
         this.shader = props.shader;
@@ -19,6 +19,7 @@ class Model {
         this.shader.use();
         // Send uniforms
         this.shader.setMat4("u_ViewProjection", viewProj);
+        this.shader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
         this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
 
         if (this.texture) {

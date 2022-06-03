@@ -1,6 +1,7 @@
 let mainScene = new Scene(scene_0);
-let camera = new Camera(viewportSize.x / viewportSize.y, 1.0, 500.0, 0.785);
-console.log(camera.getProjection());
+let camera;
+let car;
+
 let models = [];
 let shaders = {
     uniform: new Shader("uniform", [0, 1]),
@@ -22,7 +23,7 @@ function init() {
     let buildings = mainScene.scene.buildingsObjTex.slice();
     for (let i=0; i<mainScene.scene.buildingsObjTex.length; i++)
         buildings.push(mainScene.scene.buildingsObjTex[i].roof);
-/*
+
     // Create meshes and models for the buildings
     for (let i=0; i<buildings.length; i++) {
         let currBuilding = buildings[i];
@@ -44,9 +45,7 @@ function init() {
         });
 
         models.push(model);
-    }*/
-
-    console.log(mainScene);
+    }
 
     // Create meshes and models for the track and the street
     let ground = new Mesh({
@@ -83,33 +82,25 @@ function init() {
         shader:shaders.reflections
     });
     models.push(teapotModel);
+
+    car = new CarController(teapotModel, undefined, undefined);
+    camera = new Camera(viewportSize.x / viewportSize.y, 1.0, 500.0, 0.785, car);
 }
 
 function run() {
     gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
 
-    updateCamera();
+    car.update();
+    camera.update();
+
+    updateTransformStack();
     renderModels();
 
     window.requestAnimationFrame(run);
 }
 
-function updateCamera() {
-    let translation = glMatrix.vec3.create();
-    if (Events.isKeyDown('A')) {
-        translation[0] = -1;
-    }
-    if (Events.isKeyDown('D')) {
-        translation[0] = 1;
-    }
-    if (Events.isKeyDown('W')) {
-        translation[2] = -1;
-    }
-    if (Events.isKeyDown('S')) {
-        translation[2] = 1;
-    }
-
-    camera.move(translation);
+function updateTransformStack() {
+    // Traverse the stack and set the global transforms of the models
 }
 
 function renderModels() {

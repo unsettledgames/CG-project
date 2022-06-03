@@ -1,52 +1,36 @@
 class Camera {
-    constructor(aspectRatio, near, far, fov) {
-        this.translation = [0,4,0];
-        this.rotation = [0,0,0];
-        this.scale = [1,1,1];
-
-        this.transform = glMatrix.mat4.create();
-        this.offset = glMatrix.vec3.create();
+    constructor(aspectRatio, near, far, fov, car) {
+        this.transform = new Transform();
+        this.offset = [0, 4, 12];
 
         this.near = near;
         this.far = far;
         this.FOV = fov;
         this.aspectRatio = aspectRatio;
-        this.cameraSpeed = 1;
+        this.speed = 1;
 
-        this.view = glMatrix.mat4.create();
         this.projection = glMatrix.mat4.perspective(glMatrix.mat4.create(), fov, aspectRatio, near, far);
-
-        this.view = glMatrix.mat4.fromTranslation(glMatrix.mat4.create(), [0,8,2]);
+        this.transform.setTranslation([0, 4, 0]);
+        this.car = car;
     }
 
-    setTranslation(translation) {
-        this.translation = translation;
-        this.updateView();
-    }
-    setRotation(rotation) {
-        this.rotation = rotation;
-        this.updateView();
-    }
-    setScale(scale) {
-        this.scale = scale;
-        this.updateView();
-    }
+    update() {
+        let translation = this.car.transform.translation.slice();
+        let rotatedOffset = glMatrix.vec4.create();
+        let rotationMatrix = glMatrix.mat4.fromRotation(glMatrix.mat4.create(), this.car.transform.rotation[1], [0,1,0]);
 
-    move(direction) {
-        glMatrix.vec3.normalize(direction, direction);
-        glMatrix.vec3.scale(direction, direction, this.cameraSpeed);
-        glMatrix.vec3.add(this.translation, this.translation, direction);
-        this.updateView();
-    }
-    
-    updateView() {
-        this.view = glMatrix.mat4.create();
-        glMatrix.mat4.mul(this.view, glMatrix.mat4.fromScaling(glMatrix.mat4.create(), this.scale), this.view);
-        glMatrix.mat4.mul(this.view, glMatrix.mat4.fromTranslation(glMatrix.mat4.create(), this.translation), this.view);
+        // Rotate the offset so that the camera is aligned to the car
+        glMatrix.mat4.mul(rotatedOffset, rotationMatrix, [this.offset[0], this.offset[1], this.offset[2], 1]);
+        // Add the offset
+        glMatrix.vec3.add(translation, translation, rotatedOffset);
+
+        this.transform.setRotation(this.car.transform.rotation.slice());
+        this.transform.setTranslation(translation);
+        
     }
 
     getView() {
-        return this.view;
+        return this.transform.getTransform();
     }
     
     getProjection() {
@@ -55,7 +39,7 @@ class Camera {
 
     getViewProjection() {
         let ret = glMatrix.mat4.create();
-        let inverted = glMatrix.mat4.invert(glMatrix.mat4.create(), this.view.slice());
+        let inverted = glMatrix.mat4.invert(glMatrix.mat4.create(), this.transform.getTransform().slice());
         glMatrix.mat4.mul(ret, this.projection, inverted);
         return ret;
     }
