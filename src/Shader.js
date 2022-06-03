@@ -1,5 +1,5 @@
 class Shader {
-    constructor (name, attributes) {
+    constructor (name) {
         // Load source
         this.programID = gl.createProgram();
 
@@ -11,7 +11,10 @@ class Shader {
             case "reflections":
                 this.fragSrc = reflectionsFrag;
                 this.vertSrc = reflectionsVert;
-                this.posIndex = 0;
+                break;
+            case "skybox":
+                this.fragSrc = skyboxFrag;
+                this.vertSrc = skyboxVert;
                 break;
             default:
                 console.log("Shader ", name, " not supported");

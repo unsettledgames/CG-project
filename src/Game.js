@@ -1,11 +1,16 @@
 let mainScene = new Scene(scene_0);
+let skybox = new Skybox();
+let skyboxCube;
 let camera;
 let car;
 
+let frameBuffer = new FrameBuffer(viewportSize.x, viewportSize.y);
+
 let models = [];
 let shaders = {
-    uniform: new Shader("uniform", [0, 1]),
-    reflections: new Shader("reflections", [0, 1])
+    uniform: new Shader("uniform"),
+    reflections: new Shader("reflections"),
+    skybox: new Shader("skybox")
 };
 
 init();
@@ -18,6 +23,16 @@ function init() {
     gl.clearColor(0.1, 0.1, 0.2, 1.0);
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
     gl.enable(gl.DEPTH_TEST);
+
+    let cube = new Cube();
+    let cubeMesh = new Mesh({
+        vertices: cube.vertices,
+        indices: cube.triangleIndices
+    }, cube.numTriangles);
+    skyboxCube = new Model({
+        mesh: cubeMesh,
+        shader: shaders.skybox
+    });
 
     // Merge facades and roofs
     let buildings = mainScene.scene.buildingsObjTex.slice();
@@ -94,7 +109,7 @@ function run() {
     camera.update();
 
     updateTransformStack();
-    renderModels();
+    render();
 
     window.requestAnimationFrame(run);
 }
@@ -103,8 +118,23 @@ function updateTransformStack() {
     // Traverse the stack and set the global transforms of the models
 }
 
-function renderModels() {
+function render() {
+    drawSkybox();
     for (let i=0; i<models.length; i++) {
         models[i].render(camera.getViewProjection());
     }
+}
+
+function drawSkybox() {
+    shaders.skybox.use();
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, skybox.texture);
+    shaders.skybox.setTexture("u_Cubemap", skybox.texture);
+    
+    gl.depthMask(false);
+    skyboxCube.render(camera.getViewProjection());
+    gl.depthMask(true);
+    
+    shaders.skybox.unuse();
 }

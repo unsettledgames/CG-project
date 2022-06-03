@@ -31,7 +31,6 @@ class CarController {
             this.currRotationSpeed = Math.max(this.currRotationSpeed - this.rotationSpeedIncrease, -this.maxRotationSpeed)
         }
         else {
-            console.log(this.currRotationSpeed);
             if (this.rotatingLeft)
                 this.currRotationSpeed = Math.max(0.0, this.currRotationSpeed - this.rotationSpeedIncrease);
             else 
@@ -57,7 +56,7 @@ class CarController {
         glMatrix.mat4.mul(translation, this.transform.getTransform(), translation);
         // Set the new values
         this.transform.move([translation[0], translation[1], translation[2]], this.currSpeed);
-        this.transform.rotate(1, 1, this.currRotationSpeed * (this.currSpeed / this.maxSpeed));
+        this.transform.rotate(1, 1, this.currRotationSpeed);
 
         this.model.globalTransform.transform = this.transform.getTransform();
     }
