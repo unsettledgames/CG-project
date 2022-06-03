@@ -21,7 +21,7 @@ class Texture {
 
     bind() {
         gl.activeTexture(gl.TEXTURE0 + this.texUnit);
-        gl.bindTexture(gl.TEXTURE_2D, this.rendererID)
+        gl.bindTexture(gl.TEXTURE_2D, this.texture)
     }
 
     unbind() {

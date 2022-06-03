@@ -20,10 +20,11 @@ class Model {
         // Send uniforms
         this.shader.setMat4("u_ViewProjection", viewProj);
         this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
-        this.shader.setTexture("u_Texture", this.texture.getID());
 
-        this.texture.bind();
-        getGLError();
+        if (this.texture) {
+            this.shader.setTexture("u_Texture", this.texture.getID());
+            this.texture.bind();
+        }
         
         // Bind attribute buffers
         // Position
@@ -58,5 +59,8 @@ class Model {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         gl.disableVertexAttribArray(posIndex);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        if (this.texture)
+            this.texture.unbind();
+        this.shader.unuse();
     }
 }

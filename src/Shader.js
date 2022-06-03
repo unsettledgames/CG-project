@@ -96,6 +96,6 @@ class Shader {
     }
 
     unuse() {
-        gl.useProgram(0);
+        gl.useProgram(null);
     }
 }
