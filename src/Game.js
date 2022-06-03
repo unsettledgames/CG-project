@@ -22,12 +22,12 @@ function init() {
     let buildings = mainScene.scene.buildingsObjTex.slice();
     for (let i=0; i<mainScene.scene.buildingsObjTex.length; i++)
         buildings.push(mainScene.scene.buildingsObjTex[i].roof);
-
+/*
     // Create meshes and models for the buildings
     for (let i=0; i<buildings.length; i++) {
         let currBuilding = buildings[i];
         // Use a random facade texture if it's a facade, use the roof texture otherwise
-        let texture = new Texture((i >= buildings.length ? 
+        let texture = new Texture((i >= mainScene.scene.buildingsObjTex.length ? 
             "roof" : "facade" + Math.floor(Math.random()*3 + 1)), 0);
         let currMesh = new Mesh({
             vertices: currBuilding.vertices,
@@ -44,7 +44,7 @@ function init() {
         });
 
         models.push(model);
-    }
+    }*/
 
     console.log(mainScene);
 
