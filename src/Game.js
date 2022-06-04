@@ -20,7 +20,6 @@ function init() {
     canvas.width = viewportSize.x;
     canvas.height = viewportSize.y;
 
-    gl.clearColor(0.1, 0.1, 0.2, 1.0);
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
     gl.enable(gl.DEPTH_TEST);
 
@@ -99,7 +98,7 @@ function init() {
     models.push(teapotModel);
 
     car = new CarController(teapotModel, undefined, undefined);
-    camera = new Camera(viewportSize.x / viewportSize.y, 1.0, 500.0, 0.785, car);
+    camera = new Camera(viewportSize.x / viewportSize.y, 1.0, 1000.0, 0.785, car);
 }
 
 function run() {
@@ -126,6 +125,8 @@ function render() {
 }
 
 function drawSkybox() {
+    let skyboxMat = glMatrix.mat4.fromScaling(glMatrix.mat4.create(), [500,500,500]);
+    glMatrix.mat4.mul(skyboxMat, camera.getViewProjection(), skyboxMat);
     shaders.skybox.use();
 
     gl.activeTexture(gl.TEXTURE0);
@@ -133,7 +134,7 @@ function drawSkybox() {
     shaders.skybox.setTexture("u_Cubemap", skybox.texture);
     
     gl.depthMask(false);
-    skyboxCube.render(camera.getViewProjection());
+    skyboxCube.render(skyboxMat);
     gl.depthMask(true);
     
     shaders.skybox.unuse();

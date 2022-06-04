@@ -16,6 +16,9 @@ uniform  samplerCube  u_Cubemap;
 varying vec3 v_Position;		
 
 void main(void)									 
-{														 
-    gl_FragColor = textureCube(u_Cubemap, normalize(v_Position));
+{							
+    vec3 pos = v_Position;
+    pos.y = -pos.y;
+
+    gl_FragColor = textureCube(u_Cubemap, pos);
 } `;
