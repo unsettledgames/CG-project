@@ -31,8 +31,4 @@ class FrameBuffer {
 		gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
-
-    bind() {
-        gl.bind
-    }
 }

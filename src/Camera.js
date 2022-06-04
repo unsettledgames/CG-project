@@ -30,7 +30,7 @@ class Camera {
     }
 
     getView() {
-        return this.transform.getTransform();
+        return glMatrix.mat4.invert(glMatrix.mat4.create(), this.transform.getTransform());
     }
     
     getProjection() {

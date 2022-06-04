@@ -76,6 +76,18 @@ class Shader {
         getGLError();
     }
 
+    setFloat(name, value) {
+        let location = gl.getUniformLocation(this.programID, name);
+        gl.uniform1f(location, value);
+        getGLError();
+    }
+
+    setVec3(name, value) {
+        let location = gl.getUniformLocation(this.programID, name);
+        gl.uniform3fv(location, value);
+        getGLError();
+    }
+
     setVec4(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniform4fv(location, value);

@@ -7,6 +7,7 @@ class Model {
 
         this.shader = props.shader;
         this.texture = props.texture;
+        this.normalMap = props.normalMap;
         this.mesh = props.mesh;
     }
 
@@ -14,16 +15,25 @@ class Model {
         child.parent = this;
     }
 
-    render(viewProj) {
+    render(view, proj) {
         // Bind shader
         this.shader.use();
         // Send uniforms
-        this.shader.setMat4("u_ViewProjection", viewProj);
+        this.shader.setMat4("u_ViewMatrix", view);
+        this.shader.setMat4("u_ProjectionMatrix", proj);
         this.shader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
         this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
-
+        this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
+        
         if (this.texture) {
             this.shader.setTexture("u_Texture", this.texture.getID());
+            this.shader.setFloat("u_TilingFactor", this.texture.tilingFactor);
+            this.texture.bind();
+        }
+
+        if (this.normalMap) {
+            this.shader.setTexture("u_NormalMap", this.texture.getID());
+            this.shader.setFloat("u_TilingFactor", this.texture.tilingFactor);
             this.texture.bind();
         }
         
@@ -44,12 +54,18 @@ class Model {
 
         getGLError();
 
-        // TODO: add indices for the other attributes
         // Tangents
-        if(this.tangentsBuffer) { 
+        if(this.mesh.tangents) { 
             gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.tangentsBuffer);
-            gl.enableVertexAttribArray(this.shader.attributes["a_Tangent"]);
-            gl.vertexAttribPointer(this.shader.attributes["a_Tangent"], 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(tangentIndex);
+            gl.vertexAttribPointer(tangentIndex, 3, gl.FLOAT, false, 0, 0);
+        }
+
+        // Normals
+        if(this.mesh.normals) { 
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.normalBuffer);
+            gl.enableVertexAttribArray(normalIndex);
+            gl.vertexAttribPointer(normalIndex, 3, gl.FLOAT, false, 0, 0);
         }
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.mesh.indexBuffer);

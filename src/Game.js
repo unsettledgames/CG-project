@@ -1,10 +1,12 @@
+/** TODO
+ * - Asset caching
+ */
+
 let mainScene = new Scene(scene_0);
 let skybox = new Skybox();
 let skyboxCube;
 let camera;
 let car;
-
-let frameBuffer = new FrameBuffer(viewportSize.x, viewportSize.y);
 
 let models = [];
 let shaders = {
@@ -40,10 +42,17 @@ function init() {
 
     // Create meshes and models for the buildings
     for (let i=0; i<buildings.length; i++) {
-        let currBuilding = buildings[i];
+        let currBuilding = ComputeNormals(buildings[i]);
+        ComputeTangentFrame(currBuilding);
+
         // Use a random facade texture if it's a facade, use the roof texture otherwise
-        let texture = new Texture((i >= mainScene.scene.buildingsObjTex.length ? 
-            "roof" : "facade" + Math.floor(Math.random()*3 + 1)), 0);
+        let texture;
+        if (i >= mainScene.scene.buildingsObjTex.length) {
+            texture = new Texture("assets/textures/roof.jpg", 0);
+        }
+        else {
+            texture = new Texture("assets/textures/facade" + Math.floor(Math.random() * 3 + 1) + ".jpg", 0, Math.floor(Math.random() * 3 + 1));
+        }
         let currMesh = new Mesh({
             vertices: currBuilding.vertices,
             indices: currBuilding.triangleIndices,
@@ -55,41 +64,53 @@ function init() {
         let model = new Model({
             mesh: currMesh,
             shader: shaders.uniform,
-            texture: texture
+            texture: texture,
+            normalMap: new Texture("assets/textures/normals/concrete.jpg", 1, texture.tilingFactor)
         });
 
         models.push(model);
     }
 
+    ComputeNormals(mainScene.groundObj);
+    ComputeTangentFrame(mainScene.groundObj);
     // Create meshes and models for the track and the street
     let ground = new Mesh({
         vertices: mainScene.groundObj.vertices,
         indices: mainScene.groundObj.triangleIndices,
-        texCoords: mainScene.groundObj.texCoords
+        texCoords: mainScene.groundObj.texCoords,
+        tangents: mainScene.groundObj.tangents,
+        normals: mainScene.groundObj.normals
     }, mainScene.groundObj.numTriangles);
     let groundModel = new Model({
         mesh:ground,
         shader: shaders.uniform,
-        texture: new Texture("grass_tile", 0)
+        texture: new Texture("assets/textures/grass_tile.png", 0, 3)
     });
     models.push(groundModel);
 
+    ComputeNormals(mainScene.trackObj);
+    ComputeTangentFrame(mainScene.trackObj);
     let track = new Mesh({
         vertices: mainScene.trackObj.vertices,
         indices: mainScene.trackObj.triangleIndices,
-        texCoords: mainScene.trackObj.texCoords
+        texCoords: mainScene.trackObj.texCoords,
+        tangents: mainScene.trackObj.tangents,
+        normals: mainScene.trackObj.normals
     }, mainScene.trackObj.numTriangles);
     let trackModel = new Model({
         mesh:track,
         shader: shaders.uniform,
-        texture: new Texture("street4", 0)
+        texture: new Texture("assets/textures/street4.png", 0)
     });
     models.push(trackModel);
 
     let teapotObj = loadOnGPU(teapot);
+    ComputeTangentFrame(teapotObj);
     let teapotMesh = new Mesh({
         vertices: new Float32Array(teapotObj.vertices),
-        indices: new Uint16Array(teapotObj.indices)
+        indices: new Uint16Array(teapotObj.indices),
+        normals: new Float32Array(teapotObj.normals),
+        tangents: new Float32Array(teapotObj.tangents)
     }, teapotObj.nTriangles);
     let teapotModel = new Model({
         mesh:teapotMesh,
@@ -120,13 +141,14 @@ function updateTransformStack() {
 function render() {
     drawSkybox();
     for (let i=0; i<models.length; i++) {
-        models[i].render(camera.getViewProjection());
+        models[i].render(camera.getView(), camera.getProjection());
     }
 }
 
 function drawSkybox() {
     let skyboxMat = glMatrix.mat4.fromScaling(glMatrix.mat4.create(), [500,500,500]);
-    glMatrix.mat4.mul(skyboxMat, camera.getViewProjection(), skyboxMat);
+    glMatrix.mat4.mul(skyboxMat, camera.getView(), skyboxMat);
+
     shaders.skybox.use();
 
     gl.activeTexture(gl.TEXTURE0);
@@ -134,8 +156,8 @@ function drawSkybox() {
     shaders.skybox.setTexture("u_Cubemap", skybox.texture);
     
     gl.depthMask(false);
-    skyboxCube.render(skyboxMat);
+    skyboxCube.render(skyboxMat, camera.getProjection());
     gl.depthMask(true);
-    
+
     shaders.skybox.unuse();
 }
