@@ -10,9 +10,9 @@ class CarController {
         this.speedIncrease = 0.02;
 
         // Rotation speed
-        this.maxRotationSpeed = 0.03;
+        this.maxRotationSpeed = 0.06;
         this.currRotationSpeed = 0.0;
-        this.rotationSpeedIncrease = 0.0012;
+        this.rotationSpeedIncrease = 0.0024;
 
         // State
         this.goingForwards = true;

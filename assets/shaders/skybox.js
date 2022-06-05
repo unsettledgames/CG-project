@@ -1,5 +1,6 @@
 let skyboxVert = `
 
+uniform mat4 u_ModelTransform;
 uniform mat4 u_ViewMatrix;
 uniform mat4 u_ProjectionMatrix;
 
@@ -9,7 +10,7 @@ varying vec3 v_Position;
 void main(void)										 
 {							
     v_Position = normalize(a_Position);		 
-    gl_Position = u_ProjectionMatrix * u_ViewMatrix * vec4(a_Position, 1.0); 
+    gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelTransform * vec4(a_Position, 1.0); 
 }`;
 		
 let skyboxFrag = `

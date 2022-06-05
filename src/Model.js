@@ -15,7 +15,11 @@ class Model {
         child.parent = this;
     }
 
-    render(view, proj) {
+    render(camera) {
+        let view = camera.getView();
+        let proj = camera.getProjection();
+        let cameraPos = camera.transform.getTranslation();
+
         // Bind shader
         this.shader.use();
         // Send uniforms
@@ -25,6 +29,8 @@ class Model {
         this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
         this.shader.setVec3("u_AmbientLight", new Float32Array(ambientLight));
         this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
+        this.shader.setFloat("u_SpecularStrength", specularStrength);
+        this.shader.setVec3("u_CameraPosition", new Float32Array(cameraPos));
         
         if (this.texture) {
             this.shader.setTexture("u_Texture", this.texture.getID());

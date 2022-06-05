@@ -42,7 +42,14 @@ class Transform {
         this.update();
     }
 
+    setTransform(matrix) {
+        this.transform = matrix;
+    }
+
     getTransform() {
         return this.transform.slice();
+    }
+    getTranslation() {
+        return this.translation;
     }
 }

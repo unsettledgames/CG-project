@@ -35,6 +35,8 @@ function init() {
         shader: shaders.skybox
     });
 
+    skyboxCube.globalTransform.setTransform(glMatrix.mat4.fromScaling(glMatrix.mat4.create(), [500, 500, 500]));
+
     // Merge facades and roofs
     let buildings = mainScene.scene.buildingsObjTex.slice();
     for (let i=0; i<mainScene.scene.buildingsObjTex.length; i++)
@@ -141,14 +143,11 @@ function updateTransformStack() {
 function render() {
     drawSkybox();
     for (let i=0; i<models.length; i++) {
-        models[i].render(camera.getView(), camera.getProjection());
+        models[i].render(camera);
     }
 }
 
 function drawSkybox() {
-    let skyboxMat = glMatrix.mat4.fromScaling(glMatrix.mat4.create(), [500,500,500]);
-    glMatrix.mat4.mul(skyboxMat, camera.getView(), skyboxMat);
-
     shaders.skybox.use();
 
     gl.activeTexture(gl.TEXTURE0);
@@ -156,7 +155,7 @@ function drawSkybox() {
     shaders.skybox.setTexture("u_Cubemap", skybox.texture);
     
     gl.depthMask(false);
-    skyboxCube.render(skyboxMat, camera.getProjection());
+    skyboxCube.render(camera);
     gl.depthMask(true);
 
     shaders.skybox.unuse();
