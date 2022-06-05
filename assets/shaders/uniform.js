@@ -34,6 +34,9 @@ void main()
 let uniformFrag = `
 precision highp float;
 
+// State
+uniform int u_UseNormalMap;
+
 // Texturing
 uniform sampler2D u_Texture;
 uniform sampler2D u_NormalMap;
@@ -56,17 +59,24 @@ void main()
 
     vec3 viewDirection = normalize(u_CameraPosition - v_FragPos);
 
+    vec3 normal;
+    /*if (u_UseNormalMap == 1)
+        normal = normalize(texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz);
+    else*/
+        normal = v_Normal;
+
     // Diffuse component
     vec3 lightDir = normalize(u_EnvLightDir);
-    float diff = max(dot(normalize(v_Normal), lightDir), 0.0);
+    float diff = max(dot(normalize(normal), lightDir), 0.0);
     vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
 
     // Specular component
-    vec3 reflected = reflect(-lightDir, normalize(v_Normal));
+    vec3 reflected = reflect(-lightDir, normalize(normal));
     float spec = pow(max(dot(viewDirection, reflected), 0.0), 4.0);
     vec3 specular = u_SpecularStrength * spec * vec3(1.0, 1.0, 1.0);
 
     reflected = vec3(spec, spec, spec);
 
-    gl_FragColor = texColor * vec4(u_AmbientLight + diffuse + specular, 1.0);
+    //gl_FragColor = texColor * vec4(u_AmbientLight + diffuse + specular, 1.0);
+    gl_FragColor = texture2D(u_NormalMap, v_TexCoords);
 }`;

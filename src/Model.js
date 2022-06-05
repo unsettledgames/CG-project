@@ -33,15 +33,18 @@ class Model {
         this.shader.setVec3("u_CameraPosition", new Float32Array(cameraPos));
         
         if (this.texture) {
+            this.texture.bind();
             this.shader.setTexture("u_Texture", this.texture.getID());
             this.shader.setFloat("u_TilingFactor", this.texture.tilingFactor);
-            this.texture.bind();
         }
 
         if (this.normalMap) {
-            this.shader.setTexture("u_NormalMap", this.texture.getID());
-            this.shader.setFloat("u_TilingFactor", this.texture.tilingFactor);
-            this.texture.bind();
+            this.normalMap.bind();
+            this.shader.setTexture("u_NormalMap", this.normalMap.getID());
+            this.shader.setInt("u_UseNormalMap", 1);
+        }
+        else {
+            this.shader.setInt("u_UseNormalMap", 0);
         }
         
         // Bind attribute buffers
@@ -85,6 +88,8 @@ class Model {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         if (this.texture)
             this.texture.unbind();
+        if (this.normalMap)
+            this.normalMap.unbind();
         this.shader.unuse();
     }
 }

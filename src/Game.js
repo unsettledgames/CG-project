@@ -50,7 +50,7 @@ function init() {
         // Use a random facade texture if it's a facade, use the roof texture otherwise
         let texture;
         if (i >= mainScene.scene.buildingsObjTex.length) {
-            texture = new Texture("assets/textures/roof.jpg", 0);
+            texture = new Texture("assets/textures/roof.jpg");
         }
         else {
             texture = new Texture("assets/textures/facade" + Math.floor(Math.random() * 3 + 1) + ".jpg", 0, Math.floor(Math.random() * 3 + 1));
@@ -66,8 +66,7 @@ function init() {
         let model = new Model({
             mesh: currMesh,
             shader: shaders.uniform,
-            texture: texture,
-            normalMap: new Texture("assets/textures/normals/concrete.jpg", 1, texture.tilingFactor)
+            texture: texture
         });
 
         models.push(model);
@@ -86,7 +85,8 @@ function init() {
     let groundModel = new Model({
         mesh:ground,
         shader: shaders.uniform,
-        texture: new Texture("assets/textures/grass_tile.png", 0, 3)
+        texture: new Texture("assets/textures/grass_tile.png", 0, 3),
+        normalMap: new Texture("assets/textures/normals/grass.png", 1, 3)
     });
     models.push(groundModel);
 
@@ -102,7 +102,8 @@ function init() {
     let trackModel = new Model({
         mesh:track,
         shader: shaders.uniform,
-        texture: new Texture("assets/textures/street4.png", 0)
+        texture: new Texture("assets/textures/street4.png", 0),
+        normalMap: new Texture("assets/textures/normals/test_normalmap.png", 1)
     });
     models.push(trackModel);
 
