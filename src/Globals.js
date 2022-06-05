@@ -7,4 +7,5 @@ let texCoordsIndex = 1;
 let normalIndex = 2;
 let tangentIndex = 3;
 
-let envLightDir = [1, -1, 0.5];
+let envLightDir = [-1, -1, 0.5];
+let ambientLight = [0.5, 0.5, 0.5];

@@ -21,7 +21,7 @@ varying vec3 v_ViewDirection;
 varying vec4 v_ShadingColor;
 varying vec3 v_LightTS;
 varying vec3 v_ViewTS;
-varying vec3 v_Tangent; //debug
+varying vec3 v_FragPos;
 
 void main()
 {
@@ -59,7 +59,7 @@ void main()
     v_LightTS = tangentFrame * u_EnvLightDir;
     v_ViewTS = tangentFrame * V;
     v_Normal = a_Normal;
-    v_Tangent = a_Normal; //DEBUG
+    v_FragPos = (u_ViewMatrix * vec4(a_Position, 1.0)).xyz;
 
     gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelTransform * vec4(a_Position, 1.0);
 
@@ -76,6 +76,7 @@ uniform float u_TilingFactor;
 
 // Lighting
 uniform vec3 u_EnvLightDir;
+uniform vec3 u_AmbientLight;
 
 varying vec2 v_TexCoords;
 varying vec3 v_Normal;
@@ -83,7 +84,7 @@ varying vec3 v_ViewDirection;
 varying vec4 v_ShadingColor;
 varying vec3 v_LightTS;
 varying vec3 v_ViewTS;
-varying vec3 v_Tangent; //DEBUG
+varying vec3 v_FragPos;
 
 vec3 phong(vec3 color, vec3 lightDir, vec3 normal, vec3 view) {
     float NdotL = dot(lightDir, normal);
@@ -101,6 +102,10 @@ void main()
     vec2 texCoords = vec2(v_TexCoords.x, -v_TexCoords.y);
     vec4 texColor = texture2D(u_Texture, u_TilingFactor * texCoords);
 
-    vec3 finalColor = phong(texColor.xyz, normalize(v_LightTS), v_Normal, v_ViewTS);
-    gl_FragColor = vec4(finalColor, 1.0);
+    vec3 lightDir = -normalize(u_EnvLightDir);
+    float diff = max(dot(v_Normal, lightDir), 0.0);
+    // POLISH: change light colour for day / night cycle
+    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+
+    gl_FragColor = texColor * vec4(u_AmbientLight + diffuse, 1.0);
 }`;

@@ -23,6 +23,7 @@ class Model {
         this.shader.setMat4("u_ProjectionMatrix", proj);
         this.shader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
         this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
+        this.shader.setVec3("u_AmbientLight", new Float32Array(ambientLight));
         this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
         
         if (this.texture) {
