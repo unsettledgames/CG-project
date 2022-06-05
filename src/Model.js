@@ -34,13 +34,13 @@ class Model {
         
         if (this.texture) {
             this.texture.bind();
-            this.shader.setTexture("u_Texture", this.texture.getID());
+            this.shader.setTexture("u_Texture", this.texture.texUnit);
             this.shader.setFloat("u_TilingFactor", this.texture.tilingFactor);
         }
 
         if (this.normalMap) {
             this.normalMap.bind();
-            this.shader.setTexture("u_NormalMap", this.normalMap.getID());
+            this.shader.setTexture("u_NormalMap", this.normalMap.texUnit);
             this.shader.setInt("u_UseNormalMap", 1);
         }
         else {

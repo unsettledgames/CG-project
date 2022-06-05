@@ -60,9 +60,9 @@ void main()
     vec3 viewDirection = normalize(u_CameraPosition - v_FragPos);
 
     vec3 normal;
-    /*if (u_UseNormalMap == 1)
+    if (u_UseNormalMap == 1)
         normal = normalize(texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz);
-    else*/
+    else
         normal = v_Normal;
 
     // Diffuse component
@@ -77,6 +77,5 @@ void main()
 
     reflected = vec3(spec, spec, spec);
 
-    //gl_FragColor = texColor * vec4(u_AmbientLight + diffuse + specular, 1.0);
-    gl_FragColor = texture2D(u_NormalMap, v_TexCoords);
+    gl_FragColor = texColor * vec4(u_AmbientLight + diffuse + specular, 1.0);
 }`;

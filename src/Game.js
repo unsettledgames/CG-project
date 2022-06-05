@@ -103,7 +103,7 @@ function init() {
         mesh:track,
         shader: shaders.uniform,
         texture: new Texture("assets/textures/street4.png", 0),
-        normalMap: new Texture("assets/textures/normals/test_normalmap.png", 1)
+        normalMap: new Texture("assets/textures/normals/concrete.jpg", 1)
     });
     models.push(trackModel);
 
