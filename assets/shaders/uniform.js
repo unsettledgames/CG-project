@@ -10,6 +10,7 @@ uniform vec3 u_CameraPosition;
 // Lighting
 uniform vec4 u_Color;
 uniform vec3 u_EnvLightDir;
+uniform vec3 u_SpotLights[12];
 
 attribute vec3 a_Position;
 attribute vec2 a_TexCoords;
@@ -23,6 +24,7 @@ varying vec3 v_FragPos;
 varying vec3 v_ViewDir;
 varying vec3 v_ViewDirTS;
 varying vec3 v_LightDirTS;
+varying vec3 v_SpotLightsTS[12];
 
 void main()
 {
@@ -41,6 +43,9 @@ void main()
     v_ViewDir = normalize(u_CameraPosition - v_FragPos);
     v_ViewDirTS = tangentSpace * v_ViewDir;
     v_LightDirTS = tangentSpace * normalize(u_EnvLightDir);
+    for (int i=0; i<12; i++) {
+        v_SpotLightsTS[i] = tangentSpace * u_SpotLights[i];
+    }
 
     gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelTransform * vec4(a_Position, 1.0);
 }`;
@@ -61,6 +66,7 @@ uniform float u_TilingFactor;
 // Lighting
 uniform vec3 u_AmbientLight;
 uniform float u_SpecularStrength;
+uniform vec3 u_SpotLights[12];
 
 varying vec2 v_TexCoords;
 varying vec3 v_Normal;
@@ -69,13 +75,33 @@ varying vec3 v_FragPos;
 varying vec3 v_ViewDir;
 varying vec3 v_ViewDirTS;
 varying vec3 v_LightDirTS;
+varying vec3 v_SpotLightsTS[12];
+
+vec3 phong(vec3 normal, vec3 viewDirection, vec3 lightDir, float attenuation)
+{
+    // Diffuse component
+    float diff = max(dot(normalize(normal), lightDir), 0.0);
+    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+
+    // Specular component
+    vec3 reflected = reflect(-lightDir, normalize(normal));
+    float spec = pow(max(dot(v_ViewDirTS, reflected), 0.0), 4.0);
+    vec3 specular = u_SpecularStrength * spec * vec3(1.0, 1.0, 1.0);
+
+    return (u_AmbientLight + diffuse + specular) * attenuation;
+}
+
+float getAttenuation(float cosine) 
+{
+    float intensity = clamp((cosine - 0.1) / 0.6, 0.0, 1.0);
+    if (cosine > 0.7) return 1.0;
+    return clamp((cosine - 0.1) / 0.6, 0.0, 1.0);
+}
 
 void main() 
 {
     vec2 texCoords = vec2(v_TexCoords.x, -v_TexCoords.y);
     vec4 texColor = texture2D(u_Texture, u_TilingFactor * texCoords);
-
-    vec3 viewDirection = v_ViewDirTS;
 
     vec3 normal;
     if (u_UseNormalMap == 1)
@@ -92,15 +118,13 @@ void main()
         normal = v_Normal;
     }
 
-    // Diffuse component
-    vec3 lightDir = normalize(v_LightDirTS);
-    float diff = max(dot(normalize(normal), lightDir), 0.0);
-    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+    vec3 finalLight = phong(normal, v_ViewDirTS, normalize(v_LightDirTS), 1.0);
+    for (int i=0; i<12; i++) {
+        vec3 lightDir = normalize(vec3(0.0, -1.0, 0.0));
+        vec3 toLight = normalize(u_SpotLights[i] - v_FragPos);
+        float dotProduct = dot(toLight, -lightDir);
+        finalLight += vec3(1.0, 1.0, 1.0) * getAttenuation(dotProduct);
+    }
 
-    // Specular component
-    vec3 reflected = reflect(-lightDir, normalize(normal));
-    float spec = pow(max(dot(viewDirection, reflected), 0.0), 4.0);
-    vec3 specular = u_SpecularStrength * spec * vec3(1.0, 1.0, 1.0);
-
-    gl_FragColor = texColor * vec4(u_AmbientLight + diffuse + specular, 1.0);
+    gl_FragColor = texColor * vec4(finalLight, 1.0);
 }`;

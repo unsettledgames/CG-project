@@ -94,6 +94,16 @@ class Shader {
         getGLError();
     }
 
+    setVec3Array(name, value) {
+        let toSet = new Float32Array(value.length * 3);
+        for (let i=0; i<value.length * 3; i++)
+            toSet[i] = value[Math.floor(i / 3)][i%3];
+
+        let location = gl.getUniformLocation(this.programID, name);
+        gl.uniform3fv(location, toSet);
+        getGLError();
+    }
+
     setMat4(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniformMatrix4fv(location, false, value);

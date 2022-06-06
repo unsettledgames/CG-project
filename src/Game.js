@@ -9,6 +9,8 @@ let camera;
 let car;
 
 let models = [];
+let spotLights = [];
+
 let shaders = {
     uniform: new Shader("uniform"),
     reflections: new Shader("reflections"),
@@ -94,7 +96,10 @@ function init() {
 
         lampModel.globalTransform.setTranslation(mainScene.scene.lamps[i]._position);
         lampModel.globalTransform.setScale([0.2, 0.2, 0.2]);
+        
         models.push(lampModel);
+        mainScene.scene.lamps[i]._position[1] = 2;
+        spotLights.push(mainScene.scene.lamps[i]._position);
     }
 
     ComputeNormals(mainScene.groundObj);
@@ -181,7 +186,7 @@ function updateTransformStack() {
 function render() {
     drawSkybox();
     for (let i=0; i<models.length; i++) {
-        models[i].render(camera);
+        models[i].render(camera, spotLights);
     }
 }
 
@@ -193,7 +198,7 @@ function drawSkybox() {
     shaders.skybox.setTexture("u_Cubemap", skybox.texture);
     
     gl.depthMask(false);
-    skyboxCube.render(camera);
+    skyboxCube.render(camera, spotLights);
     gl.depthMask(true);
 
     shaders.skybox.unuse();

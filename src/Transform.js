@@ -4,6 +4,7 @@ class Transform {
         this.rotation = [0, 0, 0];
         this.scale = [1, 1, 1];
         this.transform = glMatrix.mat4.create();
+        this.update();
     }
 
     update() {

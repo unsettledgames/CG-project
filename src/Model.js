@@ -15,7 +15,7 @@ class Model {
         child.parent = this;
     }
 
-    render(camera) {
+    render(camera, spotLights) {
         let view = camera.getView();
         let proj = camera.getProjection();
         let cameraPos = camera.transform.getTranslation();
@@ -31,7 +31,8 @@ class Model {
         this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
         this.shader.setFloat("u_SpecularStrength", specularStrength);
         this.shader.setVec3("u_CameraPosition", new Float32Array(cameraPos));
-        
+        this.shader.setVec3Array("u_SpotLights", spotLights);
+
         if (this.texture) {
             this.texture.bind();
             this.shader.setTexture("u_Texture", this.texture.texUnit);
