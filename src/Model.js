@@ -46,6 +46,15 @@ class Model {
         else {
             this.shader.setInt("u_UseNormalMap", 0);
         }
+
+        if (this.parallaxMap) {
+            this.parallaxMap.bind();
+            this.shader.setTexture("u_ParallaxMap", this.parallaxMap.texUnit);
+            this.shader.setInt("u_UseParallaxMap", 1);
+        }
+        else {
+            this.shader.setInt("u_UseParallaxMap", 0);
+        }
         
         // Bind attribute buffers
         // Position
@@ -90,6 +99,9 @@ class Model {
             this.texture.unbind();
         if (this.normalMap)
             this.normalMap.unbind();
+        if (this.parallaxMap) {
+            this.parallaxMap.unbind();
+        }
         this.shader.unuse();
     }
 }

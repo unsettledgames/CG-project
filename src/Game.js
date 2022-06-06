@@ -49,11 +49,15 @@ function init() {
 
         // Use a random facade texture if it's a facade, use the roof texture otherwise
         let texture;
+        let normalMap = undefined;
         if (i >= mainScene.scene.buildingsObjTex.length) {
             texture = new Texture("assets/textures/roof.jpg");
         }
         else {
-            texture = new Texture("assets/textures/facade" + Math.floor(Math.random() * 3 + 1) + ".jpg", 0, Math.floor(Math.random() * 3 + 1));
+            let number =  Math.floor(Math.random() * 3 + 1);
+            let normalPath = "assets/textures/normals/facade" + number + "_normal.png";
+            texture = new Texture("assets/textures/facade" + number + ".jpg", 0, Math.floor(Math.random() * 3 + 1));
+            normalMap = new Texture(normalPath, 1, 1);
         }
         let currMesh = new Mesh({
             vertices: currBuilding.vertices,
@@ -66,7 +70,8 @@ function init() {
         let model = new Model({
             mesh: currMesh,
             shader: shaders.uniform,
-            texture: texture
+            texture: texture,
+            normalMap: normalMap
         });
 
         models.push(model);
@@ -86,24 +91,36 @@ function init() {
         mesh:ground,
         shader: shaders.uniform,
         texture: new Texture("assets/textures/grass_tile.png", 0, 3),
-        normalMap: new Texture("assets/textures/normals/grass.png", 1, 3)
+        normalMap: new Texture("assets/textures/normals/grass.png", 1, 3),
+        parallaxMap: new Texture("assets/textures/normals/grass_parallax.png", 2, 3)
     });
     models.push(groundModel);
 
     ComputeNormals(mainScene.trackObj);
-    ComputeTangentFrame(mainScene.trackObj);
+    let trackTangents = [];
+    let trackNormals = [];
+    for (let i=0; i<152; i++) {
+        trackTangents.push(0);
+        trackTangents.push(0);
+        trackTangents.push(1);
+
+        trackNormals.push(0);
+        trackNormals.push(-1);
+        trackNormals.push(0);
+    }
+    console.log(mainScene.trackObj.tangents);
     let track = new Mesh({
         vertices: mainScene.trackObj.vertices,
         indices: mainScene.trackObj.triangleIndices,
         texCoords: mainScene.trackObj.texCoords,
-        tangents: mainScene.trackObj.tangents,
-        normals: mainScene.trackObj.normals
+        tangents: new Float32Array(trackTangents),
+        normals: new Float32Array(trackNormals)
     }, mainScene.trackObj.numTriangles);
     let trackModel = new Model({
         mesh:track,
         shader: shaders.uniform,
         texture: new Texture("assets/textures/street4.png", 0),
-        normalMap: new Texture("assets/textures/normals/concrete.jpg", 1)
+        normalMap: new Texture("assets/textures/normals/asphalt.jpg", 1)
     });
     models.push(trackModel);
 
