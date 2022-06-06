@@ -77,6 +77,26 @@ function init() {
         models.push(model);
     }
 
+    // Add lamps
+    for (let i=0; i<mainScene.scene.lamps.length; i++) {
+        let lampObj = loadOnGPU(lamp);
+        ComputeTangentFrame(lampObj);
+        let lampMesh = new Mesh({
+            vertices: new Float32Array(lampObj.vertices),
+            normals: new Float32Array(lampObj.normals),
+            indices: new Uint16Array(lampObj.indices),
+            tangents: new Float32Array(lampObj.tangents)
+        }, lampObj.nTriangles);
+        let lampModel = new Model({
+            mesh: lampMesh,
+            shader: shaders.reflections
+        });
+
+        lampModel.globalTransform.setTranslation(mainScene.scene.lamps[i]._position);
+        lampModel.globalTransform.setScale([0.2, 0.2, 0.2]);
+        models.push(lampModel);
+    }
+
     ComputeNormals(mainScene.groundObj);
     ComputeTangentFrame(mainScene.groundObj);
     // Create meshes and models for the track and the street

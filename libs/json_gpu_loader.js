@@ -9,6 +9,7 @@ var loadOnGPU = function( jsonMesh ) {
    gpuMesh.normals = jsonMesh.vertices[1].values;
    gpuMesh.indices  = jsonMesh.connectivity[0].indices;
    gpuMesh.nTriangles = gpuMesh.indices.length / 3;
+   gpuMesh.numVertices = gpuMesh.nTriangles * 3;
  
    return gpuMesh;
 }

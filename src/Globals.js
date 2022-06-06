@@ -1,6 +1,6 @@
 let canvas = document.getElementById("canvas");
 let gl = canvas.getContext("webgl");
-let viewportSize = {x: 600, y: 600};
+let viewportSize = {x: 700, y: 500};
 
 let posIndex = 0;
 let texCoordsIndex = 1;
