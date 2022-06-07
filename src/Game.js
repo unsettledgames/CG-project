@@ -2,15 +2,18 @@
  * - Asset caching
  */
 
+// Scene and controllers
 let mainScene = new Scene(scene_0);
 let skybox = new Skybox();
 let skyboxCube;
 let camera;
 let car;
 
+// Models and lights
 let models = [];
 let spotLights = [];
 
+// Shaders
 let shaders = {
     uniform: new Shader("uniform"),
     reflections: new Shader("reflections"),
@@ -18,7 +21,11 @@ let shaders = {
     depth: new Shader("depth")
 };
 
+// Structures
 let frameBuffer;
+
+// Delta time
+let lastUpdate = Date.now();
 
 init();
 run();
@@ -30,7 +37,7 @@ function init() {
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
     gl.enable(gl.DEPTH_TEST);
 
-    frameBuffer = new FrameBuffer(viewportSize.x*shadowMapMultiplier, viewportSize.y*shadowMapMultiplier);
+    frameBuffer = new FrameBuffer(shadowMapSize[0], shadowMapSize[1]);
 
     let cube = new Cube();
     let cubeMesh = new Mesh({
@@ -173,10 +180,14 @@ function init() {
 }
 
 function run() {
+    let now = Date.now();
+    let dt = now - lastUpdate;
+    lastUpdate = now;
+
     gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
 
-    car.update();
-    camera.update();
+    car.update(dt);
+    camera.update(dt);
 
     updateTransformStack();
 
@@ -193,13 +204,16 @@ function updateTransformStack() {
 }
 
 function shadowPass() {
-    gl.cullFace(gl.FRONT);
+    gl.cullFace(gl.BACK);
     
     shaders.depth.use();
-    shaders.depth.setMat4("u_LightMatrix", glMatrix.mat4.fromTranslation(glMatrix.mat4.create(), envLightDir));
+    shaders.depth.setTexture("u_DepthSampler", frameBuffer.depthTexture);
+
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, this.depthTexture);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);	
-    gl.viewport(0, 0, viewportSize.x*shadowMapMultiplier, viewportSize.y*shadowMapMultiplier);
+    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
     gl.clearColor(1.0,1.0,0.0,1.0);
     gl.clearDepth(1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -207,6 +221,7 @@ function shadowPass() {
     render(shaders.depth);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindTexture(gl.TEXTURE_2D, null);
 
     // Gaussian blur
     /*if(shadowMode == 6)

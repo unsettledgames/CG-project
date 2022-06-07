@@ -5,6 +5,7 @@ precision highp float;
 uniform mat4 u_ViewMatrix;
 uniform mat4 u_ProjectionMatrix;
 uniform mat4 u_ModelTransform;
+uniform mat4 u_LightMatrix;
 uniform vec3 u_CameraPosition;
 
 // Lighting
@@ -47,6 +48,7 @@ void main()
     for (int i=0; i<12; i++) {
         v_SpotLightsTS[i] = tangentSpace * u_SpotLights[i];
     }
+    v_DepthTexCoords = (u_LightMatrix *	u_ModelTransform * vec4(a_Position, 1.0)); 
 
     gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelTransform * vec4(a_Position, 1.0);
 }`;
@@ -114,6 +116,8 @@ void main()
     vec3 depthTexCoords = (v_DepthTexCoords / v_DepthTexCoords.w).xyz;
     float storedDepth;
 
+    depthTexCoords = depthTexCoords * 0.5 + 0.5;
+
     if (u_UseNormalMap == 1)
         normal = normalize(texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz);
     else if (u_UseParallaxMap == 1) {
@@ -146,5 +150,6 @@ void main()
         }
     }
 
-    gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
+    //gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
+    gl_FragColor = vec4(storedDepth, storedDepth, storedDepth, 1.0);
 }`;

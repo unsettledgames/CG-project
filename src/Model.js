@@ -27,11 +27,13 @@ class Model {
             this.shader.setMat4("u_ViewMatrix", view);
             this.shader.setMat4("u_ProjectionMatrix", proj);
             this.shader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
+            this.shader.setMat4("u_LightMatrix", createPositionalLightMatrix(envLightDir, [0, 0, 0]));
             this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
             this.shader.setVec3("u_AmbientLight", new Float32Array(ambientLight));
             this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
             this.shader.setFloat("u_SpecularStrength", specularStrength);
             this.shader.setVec3("u_CameraPosition", new Float32Array(cameraPos));
+            this.shader.setVec2("u_ShadowmapSize", new Float32Array(shadowMapSize));
             this.shader.setVec3Array("u_SpotLights", spotLights);
 
             if (this.texture) {
@@ -107,6 +109,7 @@ class Model {
             this.shader.unuse();
         }
         else {
+            depthShader.setMat4("u_LightMatrix", createPositionalLightMatrix(envLightDir, [0, 0, 0]));
             depthShader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
             // Bind attribute buffers
             // Position

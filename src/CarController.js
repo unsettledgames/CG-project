@@ -5,14 +5,14 @@ class CarController {
         this.backWheels = backWheels;
 
         // Speed
-        this.maxSpeed = 1.0;
+        this.maxSpeed = 0.05;
         this.currSpeed = 0.0;
-        this.speedIncrease = 0.02;
+        this.speedIncrease = 0.005;
 
         // Rotation speed
-        this.maxRotationSpeed = 0.06;
+        this.maxRotationSpeed = 0.002;
         this.currRotationSpeed = 0.0;
-        this.rotationSpeedIncrease = 0.0024;
+        this.rotationSpeedIncrease = 0.0012;
 
         // State
         this.goingForwards = true;
@@ -20,7 +20,7 @@ class CarController {
         this.transform = model.localTransform;
     }
 
-    update() {
+    update(dt) {
         let translation = [0, 0, -1, 0];
         if (Events.isKeyDown("A")) {
             this.rotatingLeft = true;
@@ -55,8 +55,8 @@ class CarController {
         // Convert the input vector to object space
         glMatrix.mat4.mul(translation, this.transform.getTransform(), translation);
         // Set the new values
-        this.transform.move([translation[0], translation[1], translation[2]], this.currSpeed);
-        this.transform.rotate(1, 1, this.currRotationSpeed);
+        this.transform.move([translation[0], translation[1], translation[2]], this.currSpeed * dt);
+        this.transform.rotate(1, 1, this.currRotationSpeed * dt);
 
         this.model.globalTransform.transform = this.transform.getTransform();
     }

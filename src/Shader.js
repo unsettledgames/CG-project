@@ -86,6 +86,12 @@ class Shader {
         getGLError();
     }
 
+    setVec2(name, value) {
+        let location = gl.getUniformLocation(this.programID, name);
+        gl.uniform2fv(location, value);
+        getGLError();
+    }
+
     setVec3(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniform3fv(location, value);

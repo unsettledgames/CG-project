@@ -8,6 +8,7 @@ let normalIndex = 2;
 let tangentIndex = 3;
 
 let shadowMapMultiplier = 1;
+let shadowMapSize = [viewportSize.x * shadowMapMultiplier, viewportSize.y * shadowMapMultiplier];
 
 let envLightDir = [1, 1, 0];
 let ambientLight = [0.4, 0.4, 0.4];

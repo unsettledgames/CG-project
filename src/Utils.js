@@ -21,3 +21,13 @@ function getGLError() {
 
     console.trace();
 }
+
+function createPositionalLightMatrix(pos, target){
+    var light_matrix = glMatrix.mat4.create();
+    var proj = glMatrix.mat4.create();
+    glMatrix.mat4.lookAt(light_matrix, pos, target, [1,0,0]);
+
+    glMatrix.mat4.ortho(proj, -shadowMapSize[0] / 2.0, shadowMapSize[0] / 2.0, -shadowMapSize[1] / 2.0, shadowMapSize[1] / 2.0, 0.1, 1000.0);
+    glMatrix.mat4.mul(light_matrix, proj, light_matrix);
+    return light_matrix;
+  }
