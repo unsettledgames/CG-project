@@ -14,8 +14,11 @@ let spotLights = [];
 let shaders = {
     uniform: new Shader("uniform"),
     reflections: new Shader("reflections"),
-    skybox: new Shader("skybox")
+    skybox: new Shader("skybox"),
+    depth: new Shader("depth")
 };
+
+let frameBuffer;
 
 init();
 run();
@@ -26,6 +29,8 @@ function init() {
 
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
     gl.enable(gl.DEPTH_TEST);
+
+    frameBuffer = new FrameBuffer(viewportSize.x*shadowMapMultiplier, viewportSize.y*shadowMapMultiplier);
 
     let cube = new Cube();
     let cubeMesh = new Mesh({
@@ -174,6 +179,10 @@ function run() {
     camera.update();
 
     updateTransformStack();
+
+    shadowPass();
+
+    gl.cullFace(gl.BACK);
     render();
 
     window.requestAnimationFrame(run);
@@ -183,10 +192,40 @@ function updateTransformStack() {
     // Traverse the stack and set the global transforms of the models
 }
 
-function render() {
-    drawSkybox();
+function shadowPass() {
+    gl.cullFace(gl.FRONT);
+    
+    shaders.depth.use();
+    shaders.depth.setMat4("u_LightMatrix", glMatrix.mat4.fromTranslation(glMatrix.mat4.create(), envLightDir));
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);	
+    gl.viewport(0, 0, viewportSize.x*shadowMapMultiplier, viewportSize.y*shadowMapMultiplier);
+    gl.clearColor(1.0,1.0,0.0,1.0);
+    gl.clearDepth(1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    render(shaders.depth);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    // Gaussian blur
+    /*if(shadowMode == 6)
+        blurImage(framebuffer);
+
+    if(shadowMode==6  ){
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D,framebuffer.colorTexture);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.bindTexture(gl.TEXTURE_2D,null);
+    }
+    */
+}
+
+function render(depthShader) {
+    if (!depthShader)
+        drawSkybox();
     for (let i=0; i<models.length; i++) {
-        models[i].render(camera, spotLights);
+        models[i].render(camera, spotLights, depthShader);
     }
 }
 

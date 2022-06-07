@@ -25,6 +25,7 @@ varying vec3 v_ViewDir;
 varying vec3 v_ViewDirTS;
 varying vec3 v_LightDirTS;
 varying vec3 v_SpotLightsTS[12];
+varying vec4 v_DepthTexCoords;
 
 void main()
 {
@@ -67,6 +68,11 @@ uniform float u_TilingFactor;
 uniform vec3 u_AmbientLight;
 uniform float u_SpecularStrength;
 uniform vec3 u_SpotLights[12];
+uniform vec3 u_EnvLightDir;
+
+// Shadows
+uniform sampler2D u_DepthSampler;
+uniform vec2 u_ShadowmapSize;
 
 varying vec2 v_TexCoords;
 varying vec3 v_Normal;
@@ -76,6 +82,7 @@ varying vec3 v_ViewDir;
 varying vec3 v_ViewDirTS;
 varying vec3 v_LightDirTS;
 varying vec3 v_SpotLightsTS[12];
+varying vec4 v_DepthTexCoords;
 
 vec3 phong(vec3 normal, vec3 viewDirection, vec3 lightDir, float attenuation)
 {
@@ -93,17 +100,20 @@ vec3 phong(vec3 normal, vec3 viewDirection, vec3 lightDir, float attenuation)
 
 float getAttenuation(float cosine) 
 {
-    float intensity = clamp((cosine - 0.1) / 0.6, 0.0, 1.0);
-    if (cosine > 0.7) return 1.0;
-    return clamp((cosine - 0.1) / 0.6, 0.0, 1.0);
+    float intensity = clamp((cosine - 0.05) / 0.75, 0.0, 1.0);
+    if (cosine > 0.8) return 1.0;
+    return clamp((cosine - 0.05) / 0.75, 0.0, 1.0);
 }
 
 void main() 
 {
     vec2 texCoords = vec2(v_TexCoords.x, -v_TexCoords.y);
     vec4 texColor = texture2D(u_Texture, u_TilingFactor * texCoords);
-
     vec3 normal;
+    float light_contr = 1.0;
+    vec3 depthTexCoords = (v_DepthTexCoords / v_DepthTexCoords.w).xyz;
+    float storedDepth;
+
     if (u_UseNormalMap == 1)
         normal = normalize(texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz);
     else if (u_UseParallaxMap == 1) {
@@ -126,5 +136,15 @@ void main()
         finalLight += vec3(1.0, 1.0, 1.0) * getAttenuation(dotProduct);
     }
 
-    gl_FragColor = texColor * vec4(finalLight, 1.0);
+    for(float x=0.0; x<5.0; x+=1.0)
+    {
+        for(float y=0.0; y<5.0; y+=1.0)
+        {
+            storedDepth =  texture2D(u_DepthSampler, depthTexCoords.xy + vec2(-2.0 + x, -2.0 + y) / u_ShadowmapSize).x;
+            if(storedDepth  < depthTexCoords.z || dot(normal, u_EnvLightDir) < 0.0)
+                light_contr  -= 0.5/25.0;
+        }
+    }
+
+    gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
 }`;

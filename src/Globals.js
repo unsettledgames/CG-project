@@ -7,8 +7,13 @@ let texCoordsIndex = 1;
 let normalIndex = 2;
 let tangentIndex = 3;
 
+let shadowMapMultiplier = 1;
+
 let envLightDir = [1, 1, 0];
 let ambientLight = [0.4, 0.4, 0.4];
 let specularStrength = 0.5;
 
 //ambientLight = [0.0, 0.0, 0.0];
+
+gl.getExtension('OES_standard_derivatives');
+gl.getExtension('WEBGL_depth_texture');

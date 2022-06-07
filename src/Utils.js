@@ -18,4 +18,6 @@ function getGLError() {
             console.error("Invalid frame buffer operation");
             break;
     }
+
+    console.trace();
 }

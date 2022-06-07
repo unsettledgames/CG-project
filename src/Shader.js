@@ -16,6 +16,10 @@ class Shader {
                 this.fragSrc = skyboxFrag;
                 this.vertSrc = skyboxVert;
                 break;
+            case "depth":
+                this.fragSrc = depthFrag;
+                this.vertSrc = depthVert;
+                break;
             default:
                 console.log("Shader ", name, " not supported");
                 return;
