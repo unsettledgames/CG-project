@@ -150,6 +150,5 @@ void main()
         }
     }
 
-    //gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
-    gl_FragColor = vec4(texture2D(u_DepthSampler, vec2(0.0, 0.0)).xxx, 1.0);
+    gl_FragColor = texColor * vec4(finalLight /** light_contr*/, 1.0);
 }`;

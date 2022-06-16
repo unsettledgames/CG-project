@@ -192,9 +192,10 @@ function run() {
 
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);
-
     shadowPass();
-    //render();
+
+    gl.disable(gl.CULL_FACE);
+    render();
 
     testQuad();
 
@@ -205,53 +206,25 @@ function updateTransformStack() {
     // Traverse the stack and set the global transforms of the models
 }
 
-function testQuad() {
-    let vertices = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0]);
-    let indices = new Uint16Array([0, 2, 1, 1, 2, 3]);
-    let texCoords = new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]);
-
-    let texture = new Texture(undefined);
-    texture.id = frameBuffer.colorTexture;
-    texture.texUnit = 4;
-    texture.tilingFactor = 1.0;
-    let mesh = new Mesh({vertices: vertices, indices: indices, texCoords: texCoords}, 2);
-    let model = new Model({mesh:mesh, shader: shaders.basic});
-
-    model.render(camera, undefined);
-}
-
 function shadowPass() {
-    shaders.depth.use();
     
-    gl.clearDepth(0.5);
+    gl.clearDepth(1.0);
     
     gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);
     gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
-    gl.clearColor(1.0, 1.0, 0.0, 1.0);
+    gl.clearColor(0.0, 1.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    //render(shaders.depth);
-
+    shaders.depth.use();
+    render(shaders.depth);
     shaders.depth.unuse();
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     getGLError();
-
-    // Gaussian blur
-    /*if(shadowMode == 6)
-        blurImage(framebuffer);
-
-    if(shadowMode==6  ){
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D,framebuffer.colorTexture);
-        gl.generateMipmap(gl.TEXTURE_2D);
-        gl.bindTexture(gl.TEXTURE_2D,null);
-    }
-    */
 }
 
 function render(depthShader) {
-
     if (!depthShader) {
         drawSkybox();
     }
@@ -275,4 +248,19 @@ function drawSkybox() {
     shaders.skybox.unuse();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+}
+
+function testQuad() {
+    let vertices = new Float32Array([0, 0, 0, 0, 16, 0, 16, 0, 0, 16, 16, 0]);
+    let indices = new Uint16Array([0, 2, 1, 1, 2, 3]);
+    let texCoords = new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]);
+
+    let texture = new Texture(undefined);
+    texture.id = frameBuffer.colorTexture;
+    texture.texUnit = 4;
+    texture.tilingFactor = 1.0;
+    let mesh = new Mesh({vertices: vertices, indices: indices, texCoords: texCoords}, 2);
+    let model = new Model({mesh:mesh, shader: shaders.basic});
+
+    model.render(camera, undefined);
 }

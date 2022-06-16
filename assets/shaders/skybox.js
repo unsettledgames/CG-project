@@ -20,7 +20,7 @@ uniform  samplerCube  u_Cubemap;
 varying vec3 v_Position;		
 
 void main(void)									 
-{							
+{
     vec3 pos = v_Position;
     pos.y = -pos.y;
 

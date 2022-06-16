@@ -27,5 +27,6 @@ varying vec3 v_Position;
 
 void main(void)						
 {		
+    gl_FragColor = vec4(v_TexCoords, 0.0, 1.0);
     gl_FragColor = texture2D(u_DepthSampler, v_TexCoords);
 } `;

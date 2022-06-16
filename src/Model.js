@@ -27,7 +27,7 @@ class Model {
             this.shader.setMat4("u_ViewMatrix", view);
             this.shader.setMat4("u_ProjectionMatrix", proj);
             this.shader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
-            this.shader.setMat4("u_LightMatrix", createPositionalLightMatrix(envLightDir, [0, 0, 0]));
+            this.shader.setMat4("u_LightMatrix", createDirectionalLightMatrix(envLightDir));
             this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
             this.shader.setVec3("u_AmbientLight", new Float32Array(ambientLight));
             this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
@@ -115,7 +115,7 @@ class Model {
             gl.bindTexture(gl.TEXTURE_2D, null);
         }
         else {
-            depthShader.setMat4("u_LightMatrix", createPositionalLightMatrix(envLightDir, [0, 0, 0]));
+            depthShader.setMat4("u_LightMatrix", createDirectionalLightMatrix(envLightDir));
             depthShader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
         
             // Bind attribute buffers
