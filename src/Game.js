@@ -32,6 +32,7 @@ init();
 run();
 
 function init() {
+    console.log(mainScene);
     canvas.width = viewportSize.x;
     canvas.height = viewportSize.y;
 
@@ -225,6 +226,8 @@ function shadowPass() {
 }
 
 function render(depthShader) {
+    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
+    
     if (!depthShader) {
         drawSkybox();
     }
