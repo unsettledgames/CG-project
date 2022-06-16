@@ -21,6 +21,7 @@ attribute vec3 a_Tangent;
 varying vec2 v_TexCoords;
 varying vec3 v_Normal;
 varying vec3 v_FragPos;
+varying vec3 v_Tangent;
 
 varying vec3 v_ViewDir;
 varying vec3 v_ViewDirTS;
@@ -42,6 +43,7 @@ void main()
     v_TexCoords = a_TexCoords;
     v_FragPos = (u_ModelTransform * vec4(a_Position, 1.0)).xyz;
     v_Normal = a_Normal;
+    v_Tangent = normalize(a_Tangent);
     v_ViewDir = normalize(u_CameraPosition - v_FragPos);
     v_ViewDirTS = tangentSpace * v_ViewDir;
     v_LightDirTS = tangentSpace * normalize(u_EnvLightDir);
@@ -58,12 +60,10 @@ precision highp float;
 
 // State
 uniform int u_UseNormalMap;
-uniform int u_UseParallaxMap;
 
 // Texturing
 uniform sampler2D u_Texture;
 uniform sampler2D u_NormalMap;
-uniform sampler2D u_ParallaxMap;
 uniform float u_TilingFactor;
 
 // Lighting
@@ -79,6 +79,7 @@ uniform vec2 u_ShadowmapSize;
 varying vec2 v_TexCoords;
 varying vec3 v_Normal;
 varying vec3 v_FragPos;
+varying vec3 v_Tangent;
 
 varying vec3 v_ViewDir;
 varying vec3 v_ViewDirTS;
@@ -111,24 +112,14 @@ void main()
 {
     vec2 texCoords = vec2(v_TexCoords.x, -v_TexCoords.y);
     vec4 texColor = texture2D(u_Texture, u_TilingFactor * texCoords);
-    vec3 normal;
+    vec3 normal = v_Normal;
     float light_contr = 1.0;
     vec3 depthTexCoords = (v_FragmentLightSpace.xyz / v_FragmentLightSpace.w) * 0.5 + 0.5;
     float storedDepth;
 
 
-    if (u_UseNormalMap == 1)
-        normal = normalize(texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz);
-    else if (u_UseParallaxMap == 1) {
-        float h =  4.0 * ((texture2D(u_ParallaxMap, v_TexCoords).x));
-        vec3 V = v_ViewDirTS;
-        vec3 intVh = vec3(v_TexCoords,0.0) + (h / V.z) * V / 600.0;
-        vec2 uprime = intVh.st;
-        texColor = texture2D(u_Texture, uprime);
-        normal = normalize(texture2D(u_NormalMap, uprime).xyz);
-    }
-    else {
-        normal = v_Normal;
+    if (u_UseNormalMap == 1) {
+        normal = texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz * 2.0 - 1.0;
     }
 
     vec3 finalLight = phong(normal, v_ViewDirTS, normalize(v_LightDirTS), 1.0);
@@ -139,8 +130,6 @@ void main()
         finalLight += vec3(1.0, 1.0, 1.0) * getAttenuation(dotProduct);
     }
 
-    float shadow = 1.0;
-
     if(depthTexCoords.x > 0.0 || depthTexCoords.x < 1.0 || depthTexCoords.y > 0.0 || depthTexCoords.y < 1.0)
     {
         for(float x=0.0; x<5.0; x+=1.0)
@@ -148,11 +137,13 @@ void main()
             for(float y=0.0; y<5.0; y+=1.0)
             {
                 storedDepth =  texture2D(u_DepthSampler, depthTexCoords.xy + vec2(-2.0 + x, -2.0 + y) / u_ShadowmapSize).x;
-                if(storedDepth < depthTexCoords.z - 0.005)
+                if(storedDepth < depthTexCoords.z - 0.005 && dot(normal, normalize(v_LightDirTS)) > 0.2)
                     light_contr  -= 0.6/25.0;
             }
         }
     }
 
     gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
+    //gl_FragColor = vec4(dot(normal, normalize(u_EnvLightDir)), dot(normal, normalize(u_EnvLightDir)) , dot(normal, normalize(u_EnvLightDir)) , 1.0);
+    //gl_FragColor = vec4(normal, 1.0);
 }`;

@@ -130,8 +130,7 @@ function init() {
         mesh:ground,
         shader: shaders.uniform,
         texture: new Texture("assets/textures/grass_tile.png", 0, 3),
-        normalMap: new Texture("assets/textures/normals/grass.png", 1, 3),
-        parallaxMap: new Texture("assets/textures/normals/grass_parallax.png", 2, 3)
+        normalMap: new Texture("assets/textures/normals/grass.png", 1, 3)
     });
     models.push(groundModel);
 
@@ -192,12 +191,14 @@ function run() {
     updateTransformStack();
 
     gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
     gl.enable(gl.DEPTH_TEST);
     shadowPass();
 
     gl.disable(gl.CULL_FACE);
+    gl.cullFace(gl.FRONT);
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
-    
+
     render();
 
     testQuad();
@@ -210,7 +211,6 @@ function updateTransformStack() {
 }
 
 function shadowPass() {
-    
     gl.clearDepth(1.0);
     
     gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);
