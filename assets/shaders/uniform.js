@@ -143,19 +143,16 @@ void main()
 
     if(depthTexCoords.x > 0.0 || depthTexCoords.x < 1.0 || depthTexCoords.y > 0.0 || depthTexCoords.y < 1.0)
     {
-        float closestDepth = texture2D(u_DepthSampler, depthTexCoords.xy).r;
-        float currentDepth = depthTexCoords.z;
-        shadow = currentDepth < closestDepth + 0.005 ? 1.0 : 0.5;
-        /*for(float x=0.0; x<5.0; x+=1.0)
+        for(float x=0.0; x<5.0; x+=1.0)
         {
             for(float y=0.0; y<5.0; y+=1.0)
             {
                 storedDepth =  texture2D(u_DepthSampler, depthTexCoords.xy + vec2(-2.0 + x, -2.0 + y) / u_ShadowmapSize).x;
-                if(storedDepth  < depthTexCoords.z || dot(normal, u_EnvLightDir) < 0.0)
-                    light_contr  -= 0.5/25.0;
+                if(storedDepth < depthTexCoords.z - 0.005)
+                    light_contr  -= 0.6/25.0;
             }
-        }*/
+        }
     }
 
-    gl_FragColor = texColor * vec4(finalLight * shadow, 1.0);
+    gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
 }`;

@@ -196,6 +196,8 @@ function run() {
     shadowPass();
 
     gl.disable(gl.CULL_FACE);
+    gl.viewport(0, 0, viewportSize.x, viewportSize.y);
+    
     render();
 
     testQuad();
@@ -225,9 +227,7 @@ function shadowPass() {
     getGLError();
 }
 
-function render(depthShader) {
-    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
-    
+function render(depthShader) {    
     if (!depthShader) {
         drawSkybox();
     }

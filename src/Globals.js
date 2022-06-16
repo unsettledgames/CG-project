@@ -7,7 +7,7 @@ let texCoordsIndex = 1;
 let normalIndex = 2;
 let tangentIndex = 3;
 
-let shadowMapMultiplier = 1;
+let shadowMapMultiplier = 2;
 let shadowMapSize = [viewportSize.x * shadowMapMultiplier, viewportSize.y * shadowMapMultiplier];
 
 let envLightDir = [40, 40, 0];
