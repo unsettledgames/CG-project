@@ -17,4 +17,6 @@ let specularStrength = 0.5;
 //ambientLight = [0.0, 0.0, 0.0];
 
 gl.getExtension('OES_standard_derivatives');
+gl.getExtension("EXT_frag_depth");
 gl.getExtension('WEBGL_depth_texture');
+gl.enable(gl.DEPTH_TEST);

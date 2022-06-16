@@ -18,7 +18,8 @@ let shaders = {
     uniform: new Shader("uniform"),
     reflections: new Shader("reflections"),
     skybox: new Shader("skybox"),
-    depth: new Shader("depth")
+    depth: new Shader("depth"),
+    basic: new Shader("basic")
 };
 
 // Structures
@@ -184,17 +185,18 @@ function run() {
     let dt = now - lastUpdate;
     lastUpdate = now;
 
-    gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
-
     car.update(dt);
     camera.update(dt);
 
     updateTransformStack();
 
-    shadowPass();
+    gl.enable(gl.CULL_FACE);
+    gl.enable(gl.DEPTH_TEST);
 
-    gl.cullFace(gl.BACK);
-    render();
+    shadowPass();
+    //render();
+
+    testQuad();
 
     window.requestAnimationFrame(run);
 }
@@ -203,25 +205,37 @@ function updateTransformStack() {
     // Traverse the stack and set the global transforms of the models
 }
 
+function testQuad() {
+    let vertices = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0]);
+    let indices = new Uint16Array([0, 2, 1, 1, 2, 3]);
+    let texCoords = new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]);
+
+    let texture = new Texture(undefined);
+    texture.id = frameBuffer.colorTexture;
+    texture.texUnit = 4;
+    texture.tilingFactor = 1.0;
+    let mesh = new Mesh({vertices: vertices, indices: indices, texCoords: texCoords}, 2);
+    let model = new Model({mesh:mesh, shader: shaders.basic});
+
+    model.render(camera, undefined);
+}
+
 function shadowPass() {
-    gl.cullFace(gl.BACK);
-    
     shaders.depth.use();
-    shaders.depth.setTexture("u_DepthSampler", frameBuffer.depthTexture);
-
-    gl.activeTexture(gl.TEXTURE3);
-    gl.bindTexture(gl.TEXTURE_2D, this.depthTexture);
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);	
+    
+    gl.clearDepth(0.5);
+    
+    gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);
     gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
-    gl.clearColor(1.0,1.0,0.0,1.0);
-    gl.clearDepth(1.0);
+    gl.clearColor(1.0, 1.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    render(shaders.depth);
+    //render(shaders.depth);
 
+    shaders.depth.unuse();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    getGLError();
 
     // Gaussian blur
     /*if(shadowMode == 6)
@@ -237,8 +251,11 @@ function shadowPass() {
 }
 
 function render(depthShader) {
-    if (!depthShader)
+
+    if (!depthShader) {
         drawSkybox();
+    }
+
     for (let i=0; i<models.length; i++) {
         models[i].render(camera, spotLights, depthShader);
     }
@@ -256,4 +273,6 @@ function drawSkybox() {
     gl.depthMask(true);
 
     shaders.skybox.unuse();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 }

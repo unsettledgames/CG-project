@@ -33,8 +33,11 @@ class Model {
             this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
             this.shader.setFloat("u_SpecularStrength", specularStrength);
             this.shader.setVec3("u_CameraPosition", new Float32Array(cameraPos));
+            if (spotLights != undefined)this.shader.setVec3Array("u_SpotLights", spotLights);
+            gl.activeTexture(gl.TEXTURE4);
+            gl.bindTexture(gl.TEXTURE_2D, frameBuffer.colorTexture);
+            this.shader.setTexture("u_DepthSampler", 4);
             this.shader.setVec2("u_ShadowmapSize", new Float32Array(shadowMapSize));
-            this.shader.setVec3Array("u_SpotLights", spotLights);
 
             if (this.texture) {
                 this.texture.bind();
@@ -106,21 +109,32 @@ class Model {
             if (this.parallaxMap) {
                 this.parallaxMap.unbind();
             }
+            
             this.shader.unuse();
+            gl.activeTexture(gl.TEXTURE3);
+            gl.bindTexture(gl.TEXTURE_2D, null);
         }
         else {
             depthShader.setMat4("u_LightMatrix", createPositionalLightMatrix(envLightDir, [0, 0, 0]));
             depthShader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
+        
             // Bind attribute buffers
             // Position
             gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
             gl.enableVertexAttribArray(posIndex);
             gl.vertexAttribPointer(posIndex, 3, gl.FLOAT, false, 0, 0);
+            getGLError();
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.mesh.indexBuffer);
             getGLError();
 
             gl.drawElements(gl.TRIANGLES, this.mesh.indices.length, gl.UNSIGNED_SHORT, 0);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+            gl.disableVertexAttribArray(posIndex);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+            getGLError();
         }
     }
 }

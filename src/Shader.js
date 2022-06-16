@@ -20,6 +20,10 @@ class Shader {
                 this.fragSrc = depthFrag;
                 this.vertSrc = depthVert;
                 break;
+            case "basic":
+                this.fragSrc = basicFrag;
+                this.vertSrc = basicVert;
+                break;
             default:
                 console.log("Shader ", name, " not supported");
                 return;
@@ -122,6 +126,7 @@ class Shader {
 
     setInt(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
+        getGLError();
         gl.uniform1i(location, value);
         getGLError();
     }
