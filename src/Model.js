@@ -2,8 +2,8 @@ class Model {
 
     constructor(props) {
         this.localTransform = new Transform();
-        this.globalTransform = this.localTransform;
-        this.parent = undefined;
+        this.globalTransform = new Transform();
+        this.children = [];
 
         this.shader = props.shader;
         this.texture = props.texture;
@@ -12,7 +12,7 @@ class Model {
     }
 
     addChild(child) {
-        child.parent = this;
+        this.children.push(child);
     }
 
     render(camera, spotLights, depthShader) {

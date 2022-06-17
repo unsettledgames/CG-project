@@ -58,6 +58,12 @@ class CarController {
         this.transform.move([translation[0], translation[1], translation[2]], this.currSpeed * dt);
         this.transform.rotate(1, 1, this.currRotationSpeed * dt);
 
-        this.model.globalTransform.transform = this.transform.getTransform();
+        // Rotate wheels
+        let wheels = [];
+        wheels.push(...this.frontWheels);
+        wheels.push(...this.backWheels);
+        for (let i=0; i<wheels.length; i++) {
+            wheels[i].localTransform.rotate(1, 0, this.currSpeed * dt);
+        }
     }
 }

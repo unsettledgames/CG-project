@@ -8,6 +8,7 @@ class Scene {
                     this.bbox[3], this.bbox[1] - 0.01, this.bbox[2],
                     this.bbox[0], this.bbox[1] - 0.01, this.bbox[2],
         ];
+        console.log(this.bbox);
         this.groundObj = new QuadGround(this.quad, 10);
         this.scene.buildingObjs = new Array(this.scene.buildings.length);
         this.scene.buildingsObjTex  = new Array(this.scene.buildings.length);

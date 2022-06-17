@@ -8,6 +8,7 @@ let skybox = new Skybox();
 let skyboxCube;
 let camera;
 let car;
+let wheels = [];
 
 // Models and lights
 let models = [];
@@ -176,7 +177,34 @@ function init() {
     });
     models.push(teapotModel);
 
-    car = new CarController(teapotModel, undefined, undefined);
+    let wheelObj = loadOnGPU(wheel);
+    ComputeTangentFrame(wheelObj);
+    let wheelMesh = new Mesh({
+        vertices: new Float32Array(wheelObj.vertices),
+        indices: new Uint16Array(wheelObj.indices),
+        normals: new Float32Array(wheelObj.normals),
+        tangents: new Float32Array(wheelObj.tangents)
+    }, wheelObj.nTriangles);
+
+    for (let i=0; i<4; i++) {
+        wheels[i] = new Model({
+            mesh:wheelMesh,
+            shader:shaders.reflections
+        });
+        wheels[i].localTransform.setScale([0.3, 0.3, 0.3]);
+        teapotModel.addChild(wheels[i]);
+        models.push(wheels[i]);
+    }
+
+    wheels[0].localTransform.setTranslation([-1.3, 0.5, 1]);
+    wheels[1].localTransform.setTranslation([1.3, 0.5, 1]);
+    wheels[2].localTransform.setTranslation([-1.3, 0.5, -1]);
+    wheels[3].localTransform.setTranslation([1.3, 0.5, -1]);
+
+    car = new CarController(teapotModel);
+    car.frontWheels = [wheels[0], wheels[1]];
+    car.backWheels = [wheels[2], wheels[3]];
+
     camera = new Camera(viewportSize.x / viewportSize.y, 1.0, 1000.0, 0.785, car);
 }
 
@@ -188,7 +216,7 @@ function run() {
     car.update(dt);
     camera.update(dt);
 
-    updateTransformStack();
+    updateTransformStack(car.model, glMatrix.mat4.create());
 
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
@@ -201,13 +229,24 @@ function run() {
 
     render();
 
-    testQuad();
-
     window.requestAnimationFrame(run);
 }
 
-function updateTransformStack() {
-    // Traverse the stack and set the global transforms of the models
+function updateTransformStack(model, currMatrix) {
+    let newMatrix = glMatrix.mat4.create();
+    glMatrix.mat4.mul(newMatrix, currMatrix, model.localTransform.transform);
+
+    console.log("new transform:");
+    for (let i=0; i<4; i++) {
+        let toPrint = [];
+        for (let j=0; j<4; j++)
+            toPrint.push(newMatrix[j * 4 + i]);
+        console.log(toPrint);
+    }
+
+    model.globalTransform.setTransform(newMatrix);
+    for (let i=0; i<model.children.length; i++)
+        updateTransformStack(model.children[i], newMatrix);
 }
 
 function shadowPass() {
