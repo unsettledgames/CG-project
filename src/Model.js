@@ -69,16 +69,12 @@ class Model {
             gl.enableVertexAttribArray(posIndex);
             gl.vertexAttribPointer(posIndex, 3, gl.FLOAT, false, 0, 0);
 
-            getGLError();
-
             // Texture coordinates
             if (this.mesh.texCoords) {
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.texCoordsBuffer);	
                 gl.enableVertexAttribArray(texCoordsIndex);
                 gl.vertexAttribPointer(texCoordsIndex, 2, gl.FLOAT, false, 0, 0);
             }
-
-            getGLError();
 
             // Tangents
             if(this.mesh.tangents) { 
@@ -95,20 +91,12 @@ class Model {
             }
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.mesh.indexBuffer);
-            getGLError();
 
             gl.drawElements(gl.TRIANGLES, this.mesh.indices.length, gl.UNSIGNED_SHORT, 0);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             gl.disableVertexAttribArray(posIndex);
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            if (this.texture)
-                this.texture.unbind();
-            if (this.normalMap)
-                this.normalMap.unbind();
-            if (this.parallaxMap) {
-                this.parallaxMap.unbind();
-            }
             
             this.shader.unuse();
             gl.activeTexture(gl.TEXTURE3);
@@ -123,18 +111,14 @@ class Model {
             gl.bindBuffer(gl.ARRAY_BUFFER, this.mesh.vertexBuffer);
             gl.enableVertexAttribArray(posIndex);
             gl.vertexAttribPointer(posIndex, 3, gl.FLOAT, false, 0, 0);
-            getGLError();
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.mesh.indexBuffer);
-            getGLError();
 
             gl.drawElements(gl.TRIANGLES, this.mesh.indices.length, gl.UNSIGNED_SHORT, 0);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
             gl.disableVertexAttribArray(posIndex);
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-            getGLError();
         }
     }
 }

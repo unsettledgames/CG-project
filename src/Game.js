@@ -33,7 +33,6 @@ init();
 run();
 
 function init() {
-    console.log(mainScene);
     canvas.width = viewportSize.x;
     canvas.height = viewportSize.y;
 
@@ -68,13 +67,13 @@ function init() {
         let texture;
         let normalMap = undefined;
         if (i >= mainScene.scene.buildingsObjTex.length) {
-            texture = new Texture("assets/textures/roof.jpg");
+            texture = getTexture("assets/textures/roof.jpg");
         }
         else {
             let number =  Math.floor(Math.random() * 3 + 1);
             let normalPath = "assets/textures/normals/facade" + number + "_normal.png";
-            texture = new Texture("assets/textures/facade" + number + ".jpg", 0, Math.floor(Math.random() * 3 + 1));
-            normalMap = new Texture(normalPath, 1, 1);
+            texture = getTexture("assets/textures/facade" + number + ".jpg", 0, Math.floor(Math.random() * 3 + 1));
+            normalMap = getTexture(normalPath, 1, 1);
         }
         let currMesh = new Mesh({
             vertices: currBuilding.vertices,
@@ -130,8 +129,8 @@ function init() {
     let groundModel = new Model({
         mesh:ground,
         shader: shaders.uniform,
-        texture: new Texture("assets/textures/grass_tile.png", 0, 3),
-        normalMap: new Texture("assets/textures/normals/grass.png", 1, 3)
+        texture: getTexture("assets/textures/grass_tile.png", 0, 3),
+        normalMap: getTexture("assets/textures/normals/grass.png", 1, 3)
     });
     models.push(groundModel);
 
@@ -147,7 +146,6 @@ function init() {
         trackNormals.push(-1);
         trackNormals.push(0);
     }
-    console.log(mainScene.trackObj.tangents);
     let track = new Mesh({
         vertices: mainScene.trackObj.vertices,
         indices: mainScene.trackObj.triangleIndices,
@@ -158,8 +156,8 @@ function init() {
     let trackModel = new Model({
         mesh:track,
         shader: shaders.uniform,
-        texture: new Texture("assets/textures/street4.png", 0),
-        normalMap: new Texture("assets/textures/normals/asphalt.jpg", 1)
+        texture: getTexture("assets/textures/street4.png", 0),
+        normalMap: getTexture("assets/textures/normals/asphalt.jpg", 1)
     });
     models.push(trackModel);
 
@@ -218,15 +216,10 @@ function run() {
 
     updateTransformStack(car.model, glMatrix.mat4.create());
 
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
     gl.enable(gl.DEPTH_TEST);
     shadowPass();
 
-    gl.disable(gl.CULL_FACE);
-    gl.cullFace(gl.FRONT);
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
-
     render();
 
     window.requestAnimationFrame(run);
@@ -235,15 +228,7 @@ function run() {
 function updateTransformStack(model, currMatrix) {
     let newMatrix = glMatrix.mat4.create();
     glMatrix.mat4.mul(newMatrix, currMatrix, model.localTransform.transform);
-
-    console.log("new transform:");
-    for (let i=0; i<4; i++) {
-        let toPrint = [];
-        for (let j=0; j<4; j++)
-            toPrint.push(newMatrix[j * 4 + i]);
-        console.log(toPrint);
-    }
-
+    
     model.globalTransform.setTransform(newMatrix);
     for (let i=0; i<model.children.length; i++)
         updateTransformStack(model.children[i], newMatrix);
@@ -262,8 +247,6 @@ function shadowPass() {
     shaders.depth.unuse();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-    getGLError();
 }
 
 function render(depthShader) {    
@@ -305,4 +288,17 @@ function testQuad() {
     let model = new Model({mesh:mesh, shader: shaders.basic});
 
     model.render(camera, undefined);
+}
+
+function getTexture(path, texUnit, tilingFactor) {
+    let texture;
+    
+    if (assetCache[path] != undefined)
+        texture = assetCache[path];
+    else {
+        texture = new Texture(path, texUnit, tilingFactor);
+        assetCache[path] = texture;
+    }
+
+    return texture;
 }

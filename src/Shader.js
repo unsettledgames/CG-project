@@ -81,31 +81,31 @@ class Shader {
 
     use() {
         gl.useProgram(this.programID);
-        getGLError();
+        
     }
 
     setFloat(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniform1f(location, value);
-        getGLError();
+        
     }
 
     setVec2(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniform2fv(location, value);
-        getGLError();
+        
     }
 
     setVec3(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniform3fv(location, value);
-        getGLError();
+        
     }
 
     setVec4(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniform4fv(location, value);
-        getGLError();
+        
     }
 
     setVec3Array(name, value) {
@@ -115,20 +115,20 @@ class Shader {
 
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniform3fv(location, toSet);
-        getGLError();
+        
     }
 
     setMat4(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
         gl.uniformMatrix4fv(location, false, value);
-        getGLError();
+        
     }
 
     setInt(name, value) {
         let location = gl.getUniformLocation(this.programID, name);
-        getGLError();
+        
         gl.uniform1i(location, value);
-        getGLError();
+        
     }
 
     setTexture(name, value) {

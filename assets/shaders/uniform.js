@@ -90,11 +90,11 @@ varying vec4 v_FragmentLightSpace;
 vec3 phong(vec3 normal, vec3 viewDirection, vec3 lightDir, float attenuation)
 {
     // Diffuse component
-    float diff = max(dot(normalize(normal), lightDir), 0.0);
+    float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
 
     // Specular component
-    vec3 reflected = reflect(-lightDir, normalize(normal));
+    vec3 reflected = reflect(-lightDir, normal);
     float spec = pow(max(dot(v_ViewDirTS, reflected), 0.0), 4.0);
     vec3 specular = u_SpecularStrength * spec * vec3(1.0, 1.0, 1.0);
 
@@ -112,17 +112,14 @@ void main()
 {
     vec2 texCoords = vec2(v_TexCoords.x, -v_TexCoords.y);
     vec4 texColor = texture2D(u_Texture, u_TilingFactor * texCoords);
-    vec3 normal = v_Normal;
+    vec3 normal = normalize(v_Normal);
     float light_contr = 1.0;
     vec3 depthTexCoords = (v_FragmentLightSpace.xyz / v_FragmentLightSpace.w) * 0.5 + 0.5;
     float storedDepth;
+    
+    normal = texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz * 2.0 - 1.0;
 
-
-    if (u_UseNormalMap == 1) {
-        normal = texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz * 2.0 - 1.0;
-    }
-
-    vec3 finalLight = phong(normal, v_ViewDirTS, normalize(v_LightDirTS), 1.0);
+    vec3 finalLight = phong(normal, v_ViewDirTS, v_LightDirTS, 1.0);
     for (int i=0; i<12; i++) {
         vec3 lightDir = normalize(vec3(0.0, -1.0, 0.0));
         vec3 toLight = normalize(u_SpotLights[i] - v_FragPos);
@@ -130,20 +127,15 @@ void main()
         finalLight += vec3(1.0, 1.0, 1.0) * getAttenuation(dotProduct);
     }
 
-    if(depthTexCoords.x > 0.0 || depthTexCoords.x < 1.0 || depthTexCoords.y > 0.0 || depthTexCoords.y < 1.0)
+    for(float x=0.0; x<5.0; x+=1.0)
     {
-        for(float x=0.0; x<5.0; x+=1.0)
+        for(float y=0.0; y<5.0; y+=1.0)
         {
-            for(float y=0.0; y<5.0; y+=1.0)
-            {
-                storedDepth =  texture2D(u_DepthSampler, depthTexCoords.xy + vec2(-2.0 + x, -2.0 + y) / u_ShadowmapSize).x;
-                if(storedDepth < depthTexCoords.z - 0.005 && dot(normal, normalize(v_LightDirTS)) > 0.2)
-                    light_contr  -= 0.6/25.0;
-            }
+            storedDepth =  texture2D(u_DepthSampler, depthTexCoords.xy + vec2(-2.0 + x, -2.0 + y) / u_ShadowmapSize).x;
+            if(storedDepth < depthTexCoords.z - 0.005 && dot(normal, normalize(v_LightDirTS)) > 0.2)
+                light_contr  -= 0.6/25.0;
         }
     }
 
     gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
-    //gl_FragColor = vec4(dot(normal, normalize(u_EnvLightDir)), dot(normal, normalize(u_EnvLightDir)) , dot(normal, normalize(u_EnvLightDir)) , 1.0);
-    //gl_FragColor = vec4(normal, 1.0);
 }`;

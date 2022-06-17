@@ -13,6 +13,7 @@ let shadowMapSize = [viewportSize.x * shadowMapMultiplier, viewportSize.y * shad
 let envLightDir = [40, 40, 0];
 let ambientLight = [0.4, 0.4, 0.4];
 let specularStrength = 0.5;
+let assetCache = {};
 
 //ambientLight = [0.0, 0.0, 0.0];
 

@@ -7,12 +7,12 @@ class CarController {
         // Speed
         this.maxSpeed = 0.05;
         this.currSpeed = 0.0;
-        this.speedIncrease = 0.005;
+        this.speedIncrease = 0.001;
 
         // Rotation speed
         this.maxRotationSpeed = 0.002;
         this.currRotationSpeed = 0.0;
-        this.rotationSpeedIncrease = 0.0012;
+        this.rotationSpeedIncrease = 0.00008;
 
         // State
         this.goingForwards = true;
@@ -64,6 +64,11 @@ class CarController {
         wheels.push(...this.backWheels);
         for (let i=0; i<wheels.length; i++) {
             wheels[i].localTransform.rotate(1, 0, this.currSpeed * dt);
+        }
+
+        // Rotate front wheels if necessary
+        for (let i=0; i<this.frontWheels.length; i++) {
+            this.backWheels[i].localTransform.rotation[1] = this.currRotationSpeed * 4;
         }
     }
 }
