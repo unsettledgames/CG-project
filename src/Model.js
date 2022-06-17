@@ -21,12 +21,17 @@ class Model {
         let cameraPos = camera.transform.getTranslation();
 
         if (!depthShader) {
+            console.log(leftHeadlightMatrix);
+            console.log(rightHeadlightMatrix);
             // Bind shader
             this.shader.use();
             // Send uniforms
             this.shader.setMat4("u_ViewMatrix", view);
             this.shader.setMat4("u_ProjectionMatrix", proj);
             this.shader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
+            this.shader.setMat4("u_LeftHeadlightView", leftHeadlightMatrix);
+            this.shader.setMat4("u_RightHeadlightView", rightHeadlightMatrix);
+            this.shader.setMat4("u_HeadlightProj", headlightsProjection);
             this.shader.setMat4("u_LightMatrix", createDirectionalLightMatrix(envLightDir));
             this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
             this.shader.setVec3("u_AmbientLight", new Float32Array(ambientLight));
@@ -38,6 +43,9 @@ class Model {
             gl.bindTexture(gl.TEXTURE_2D, frameBuffer.colorTexture);
             this.shader.setTexture("u_DepthSampler", 4);
             this.shader.setVec2("u_ShadowmapSize", new Float32Array(shadowMapSize));
+
+            headlightTexture.bind();
+            this.shader.setTexture("u_HeadlightTexture", headlightTexture.texUnit);
 
             if (this.texture) {
                 this.texture.bind();

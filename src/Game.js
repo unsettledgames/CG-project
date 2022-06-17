@@ -214,6 +214,7 @@ function run() {
     car.update(dt);
     camera.update(dt);
 
+    computeHeadlightMats();
     updateTransformStack(car.model, glMatrix.mat4.create());
 
     gl.enable(gl.DEPTH_TEST);
@@ -288,6 +289,22 @@ function testQuad() {
     let model = new Model({mesh:mesh, shader: shaders.basic});
 
     model.render(camera, undefined);
+}
+
+function computeHeadlightMats() {
+    // Update headlight data
+    let rightHeadlight = glMatrix.vec4.create();
+    let leftHeadLight = glMatrix.vec4.create();
+    let rightDir = glMatrix.vec4.create();
+    let leftDir = glMatrix.vec4.create();
+
+    glMatrix.mat4.mul(rightHeadlight, car.model.localTransform.transform, rightHeadlightOrigin);
+    glMatrix.mat4.mul(leftHeadLight, car.model.localTransform.transform, leftHeadlightOrigin);
+    glMatrix.mat4.mul(rightDir, car.model.localTransform.transform, rightHeadlightDir);
+    glMatrix.mat4.mul(leftDir, car.model.localTransform.transform, leftHeadlightDir);
+
+    leftHeadlightMatrix = glMatrix.mat4.lookAt(glMatrix.mat4.create(), leftHeadLight, leftDir,[0, 1, 0]); 
+    rightHeadlightMatrix = glMatrix.mat4.lookAt(glMatrix.mat4.create(), rightHeadlight, rightDir,[0, 1, 0]);
 }
 
 function getTexture(path, texUnit, tilingFactor) {

@@ -72,6 +72,12 @@ uniform float u_SpecularStrength;
 uniform vec3 u_SpotLights[12];
 uniform vec3 u_EnvLightDir;
 
+// Headlights
+uniform mat4 u_HeadlightProj;
+uniform mat4 u_LeftHeadlightView;
+uniform mat4 u_RightHeadlightView;
+uniform sampler2D u_HeadlightTexture;
+
 // Shadows
 uniform sampler2D u_DepthSampler;
 uniform vec2 u_ShadowmapSize;
@@ -119,6 +125,7 @@ void main()
     
     normal = texture2D(u_NormalMap, u_TilingFactor * texCoords).xyz * 2.0 - 1.0;
 
+    // LIGHTING
     vec3 finalLight = phong(normal, v_ViewDirTS, v_LightDirTS, 1.0);
     for (int i=0; i<12; i++) {
         vec3 lightDir = normalize(vec3(0.0, -1.0, 0.0));
@@ -127,6 +134,7 @@ void main()
         finalLight += vec3(1.0, 1.0, 1.0) * getAttenuation(dotProduct);
     }
 
+    // SHADOWS
     for(float x=0.0; x<5.0; x+=1.0)
     {
         for(float y=0.0; y<5.0; y+=1.0)
@@ -137,5 +145,19 @@ void main()
         }
     }
 
-    gl_FragColor = texColor * vec4(finalLight * light_contr, 1.0);
+    // HEADLIGHTS
+    vec4 headlightLeftTexCoords = u_HeadlightProj * u_LeftHeadlightView * vec4(v_FragPos, 1.0);
+    vec4 headlightRightTexCoords = u_HeadlightProj * u_RightHeadlightView * vec4(v_FragPos, 1.0);
+
+    headlightLeftTexCoords = (headlightLeftTexCoords / headlightLeftTexCoords.w) * 0.5 + 0.5;
+    headlightRightTexCoords = (headlightRightTexCoords / headlightRightTexCoords.w) * 0.5 + 0.5;
+
+    vec4 rightHeadlightCol, leftHeadlightCol; 
+
+    if (headlightRightTexCoords.x >= 0.0 && headlightRightTexCoords.x <= 1.0 && headlightRightTexCoords.y >= 0.0 && headlightRightTexCoords.y <= 1.0)
+        rightHeadlightCol = texture2D(u_HeadlightTexture, headlightRightTexCoords.xy);
+    if (headlightLeftTexCoords.x >= 0.0 && headlightLeftTexCoords.x <= 1.0 && headlightLeftTexCoords.y >= 0.0 && headlightLeftTexCoords.y <= 1.0)
+        leftHeadlightCol = texture2D(u_HeadlightTexture, headlightLeftTexCoords.xy);
+
+    gl_FragColor = texColor * vec4(finalLight * light_contr + ((rightHeadlightCol.rgb * rightHeadlightCol.a) + (leftHeadlightCol.rgb * leftHeadlightCol.a)), 1.0);
 }`;
