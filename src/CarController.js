@@ -21,6 +21,10 @@ class CarController {
     }
 
     update(dt) {
+        // Don't control the camera if the user is in free flight mode
+        if (camera.mode == "free")
+            return;
+
         let translation = [0, 0, -1, 0];
         if (Events.isKeyDown("A")) {
             this.rotatingLeft = true;
