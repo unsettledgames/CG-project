@@ -22,6 +22,8 @@ let shaders = {
 
 // Structures
 let frameBuffer;
+let rightHeadlightBuffer;
+let leftHeadlightBuffer;
 
 // Delta time
 let lastUpdate = Date.now();
@@ -37,6 +39,8 @@ function init() {
     gl.enable(gl.DEPTH_TEST);
 
     frameBuffer = new FrameBuffer(shadowMapSize[0], shadowMapSize[1]);
+    rightHeadlightBuffer = new FrameBuffer(shadowMapSize[0], shadowMapSize[1]);
+    leftHeadlightBuffer = new FrameBuffer(shadowMapSize[0], shadowMapSize[1]);
 
     let cube = new Cube();
     let cubeMesh = new Mesh({
@@ -216,8 +220,10 @@ function run() {
 
     gl.enable(gl.DEPTH_TEST);
     shadowPass();
+    headlightsPass();
 
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
+    testQuad();
     render();
 
     window.requestAnimationFrame(run);
@@ -232,6 +238,36 @@ function updateTransformStack(model, currMatrix) {
         updateTransformStack(model.children[i], newMatrix);
 }
 
+function headlightsPass() {
+    gl.clearDepth(1.0);
+    
+    // Right headlight
+    gl.bindFramebuffer(gl.FRAMEBUFFER, rightHeadlightBuffer.frameBuffer);
+    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
+    gl.clearColor(0.0, 1.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    shaders.depth.use();
+    let lightMatrix = rightHeadlightMatrix;
+    render(shaders.depth, glMatrix.mat4.mul(glMatrix.mat4.create(), headlightsProjection, lightMatrix));
+    shaders.depth.unuse();
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    // Left headlight
+    gl.bindFramebuffer(gl.FRAMEBUFFER, leftHeadlightBuffer.frameBuffer);
+    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
+    gl.clearColor(0.0, 1.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    shaders.depth.use();
+    lightMatrix = leftHeadlightMatrix;
+    render(shaders.depth, glMatrix.mat4.mul(glMatrix.mat4.create(), headlightsProjection, lightMatrix));
+    shaders.depth.unuse();
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
 function shadowPass() {
     gl.clearDepth(1.0);
     
@@ -241,19 +277,20 @@ function shadowPass() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     shaders.depth.use();
-    render(shaders.depth);
+    let lightMatrix = createDirectionalLightMatrix(envLightDir);
+    render(shaders.depth, lightMatrix);
     shaders.depth.unuse();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 }
 
-function render(depthShader) {    
+function render(depthShader, lightMatrix) {    
     if (!depthShader) {
         drawSkybox();
     }
 
     for (let i=0; i<models.length; i++) {
-        models[i].render(camera, spotLights, depthShader);
+        models[i].render(camera, spotLights, depthShader, lightMatrix);
     }
 }
 
@@ -279,13 +316,13 @@ function testQuad() {
     let texCoords = new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]);
 
     let texture = new Texture(undefined);
-    texture.id = frameBuffer.colorTexture;
+    texture.id = leftHeadlightBuffer.colorTexture;
     texture.texUnit = 4;
     texture.tilingFactor = 1.0;
     let mesh = new Mesh({vertices: vertices, indices: indices, texCoords: texCoords}, 2);
     let model = new Model({mesh:mesh, shader: shaders.basic});
 
-    model.render(camera, undefined);
+    model.render(camera, undefined, undefined, createDirectionalLightMatrix(rightHeadlightMatrix));
 }
 
 function computeHeadlightMats() {

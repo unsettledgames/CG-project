@@ -15,7 +15,7 @@ class Model {
         this.children.push(child);
     }
 
-    render(camera, spotLights, depthShader) {
+    render(camera, spotLights, depthShader, lightMatrix) {
         let view = camera.getView();
         let proj = camera.getProjection();
         let cameraPos = camera.transform.getTranslation();
@@ -37,10 +37,19 @@ class Model {
             this.shader.setFloat("u_SpecularStrength", specularStrength);
             this.shader.setVec3("u_CameraPosition", new Float32Array(cameraPos));
             if (spotLights != undefined)this.shader.setVec3Array("u_SpotLights", spotLights);
+            // Submit shadowmaps
             gl.activeTexture(gl.TEXTURE4);
             gl.bindTexture(gl.TEXTURE_2D, frameBuffer.colorTexture);
             this.shader.setTexture("u_DepthSampler", 4);
             this.shader.setVec2("u_ShadowmapSize", new Float32Array(shadowMapSize));
+
+            gl.activeTexture(gl.TEXTURE7);
+            gl.bindTexture(gl.TEXTURE_2D, leftHeadlightBuffer.colorTexture);
+            this.shader.setTexture("u_LeftHeadlightShadows", 7);
+
+            gl.activeTexture(gl.TEXTURE8);
+            gl.bindTexture(gl.TEXTURE_2D, rightHeadlightBuffer.colorTexture);
+            this.shader.setTexture("u_RightHeadlightShadows", 8);
 
             headlightTexture.bind();
             this.shader.setTexture("u_HeadlightTexture", headlightTexture.texUnit);
@@ -109,7 +118,7 @@ class Model {
             gl.bindTexture(gl.TEXTURE_2D, null);
         }
         else {
-            depthShader.setMat4("u_LightMatrix", createDirectionalLightMatrix(envLightDir));
+            depthShader.setMat4("u_LightMatrix", lightMatrix);
             depthShader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
         
             // Bind attribute buffers
@@ -119,7 +128,6 @@ class Model {
             gl.vertexAttribPointer(posIndex, 3, gl.FLOAT, false, 0, 0);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.mesh.indexBuffer);
-
             gl.drawElements(gl.TRIANGLES, this.mesh.indices.length, gl.UNSIGNED_SHORT, 0);
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);

@@ -77,6 +77,8 @@ uniform mat4 u_HeadlightProj;
 uniform mat4 u_LeftHeadlightView;
 uniform mat4 u_RightHeadlightView;
 uniform sampler2D u_HeadlightTexture;
+uniform sampler2D u_LeftHeadlightShadows;
+uniform sampler2D u_RightHeadlightShadows;
 
 // Shadows
 uniform sampler2D u_DepthSampler;
@@ -154,10 +156,26 @@ void main()
 
     vec4 rightHeadlightCol, leftHeadlightCol; 
 
-    if (headlightRightTexCoords.x >= 0.0 && headlightRightTexCoords.x <= 1.0 && headlightRightTexCoords.y >= 0.0 && headlightRightTexCoords.y <= 1.0)
-        rightHeadlightCol = texture2D(u_HeadlightTexture, headlightRightTexCoords.xy);
-    if (headlightLeftTexCoords.x >= 0.0 && headlightLeftTexCoords.x <= 1.0 && headlightLeftTexCoords.y >= 0.0 && headlightLeftTexCoords.y <= 1.0)
-        leftHeadlightCol = texture2D(u_HeadlightTexture, headlightLeftTexCoords.xy);
+    float slopeDependentBias = clamp(0.005 * tan(acos(dot(v_Normal, u_EnvLightDir))), 0.005, 0.01);
+
+    if (headlightRightTexCoords.x >= 0.0 && headlightRightTexCoords.x <= 1.0 
+        && headlightRightTexCoords.y >= 0.0 && headlightRightTexCoords.y <= 1.0
+        && headlightRightTexCoords.z >= 0.0 && headlightRightTexCoords.z <= 1.0)
+    {
+        storedDepth = texture2D(u_RightHeadlightShadows, headlightRightTexCoords.xy).x;
+        if (storedDepth > headlightRightTexCoords.z - slopeDependentBias)
+            rightHeadlightCol = texture2D(u_HeadlightTexture, headlightRightTexCoords.xy);
+    }
+
+    if (headlightLeftTexCoords.x >= 0.0 && headlightLeftTexCoords.x <= 1.0 
+        && headlightLeftTexCoords.y >= 0.0 && headlightLeftTexCoords.y <= 1.0
+        && headlightLeftTexCoords.z >= 0.0 && headlightLeftTexCoords.z <= 1.0)
+    {
+        storedDepth = texture2D(u_LeftHeadlightShadows, headlightLeftTexCoords.xy).x;
+        if (storedDepth > headlightLeftTexCoords.z - slopeDependentBias)
+            leftHeadlightCol = texture2D(u_HeadlightTexture, headlightLeftTexCoords.xy);
+    }
 
     gl_FragColor = texColor * vec4(finalLight * light_contr + ((rightHeadlightCol.rgb * rightHeadlightCol.a) + (leftHeadlightCol.rgb * leftHeadlightCol.a)), 1.0);
+    //gl_FragColor = vec4(storedDepth, storedDepth, storedDepth, 1.0);
 }`;
