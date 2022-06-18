@@ -23,9 +23,9 @@ class Skybox {
         this.loadFace("assets/textures/cubemap/negX.jpg", gl.TEXTURE_CUBE_MAP_NEGATIVE_X);
         this.loadFace("assets/textures/cubemap/negZ.jpg", gl.TEXTURE_CUBE_MAP_NEGATIVE_Z);
         this.loadFace("assets/textures/cubemap/posX.jpg", gl.TEXTURE_CUBE_MAP_POSITIVE_X);
-        this.loadFace("assets/textures/cubemap/posY.jpg", gl.TEXTURE_CUBE_MAP_POSITIVE_Y);
+        this.loadFace("assets/textures/cubemap/negY.jpg", gl.TEXTURE_CUBE_MAP_POSITIVE_Y);
         this.loadFace("assets/textures/cubemap/posZ.jpg", gl.TEXTURE_CUBE_MAP_POSITIVE_Z);
-        this.loadFace("assets/textures/cubemap/negY.jpg", gl.TEXTURE_CUBE_MAP_NEGATIVE_Y);
+        this.loadFace("assets/textures/cubemap/posY.jpg", gl.TEXTURE_CUBE_MAP_NEGATIVE_Y);
 
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);

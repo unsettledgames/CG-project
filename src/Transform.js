@@ -44,6 +44,9 @@ class Transform {
     }
 
     setTransform(matrix) {
+        for (let i=0; i<matrix.length; i++)
+            if (matrix[i] == -0)
+                matrix[i] = 0;
         this.transform = matrix;
     }
 

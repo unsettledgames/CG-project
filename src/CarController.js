@@ -5,7 +5,7 @@ class CarController {
         this.backWheels = backWheels;
 
         // Speed
-        this.maxSpeed = 0.05;
+        this.maxSpeed = 0.04;
         this.currSpeed = 0.0;
         this.speedIncrease = 0.001;
 

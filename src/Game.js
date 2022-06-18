@@ -1,6 +1,3 @@
-/** TODO
- * - Asset caching
- */
 
 // Scene and controllers
 let mainScene = new Scene(scene_0);

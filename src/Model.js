@@ -21,8 +21,6 @@ class Model {
         let cameraPos = camera.transform.getTranslation();
 
         if (!depthShader) {
-            console.log(leftHeadlightMatrix);
-            console.log(rightHeadlightMatrix);
             // Bind shader
             this.shader.use();
             // Send uniforms
