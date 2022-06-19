@@ -14,25 +14,9 @@ class Camera {
         this.transform.setTranslation([0, 4, 0]);
         this.car = car;
 
-        // Trackball
+        // Free movement
         this.dragging = false;
         this.lastMousePos = [viewportSize.x / 2, viewportSize.y / 2];
-        /*
-        
-        this.start_point      = [0,0,0];
-        this.trackball_center= [0,0,-10.0];
-        this.trackball_matrix = glMatrix.mat4.create();
-        this.trackball_rotation = glMatrix.mat4.create();
-        this.trackball_scaling = glMatrix.mat4.create();
-        this.invTrackball_matrix = glMatrix.mat4.create();
-        this.scaling_factor = 1.0;
-        this.l  = -0.1;
-        this.r  =  0.1;
-        this.b  = -0.1;
-        this.t  =  0.1;
-        this.n  =  0.1;
-        this.f  = 15.0;
-        */
 
         document.addEventListener("mousedown", this.mouseDown.bind(this));
         document.addEventListener("mouseup", this.mouseUp.bind(this));
@@ -123,8 +107,8 @@ class Camera {
         let pos = [e.clientX, e.clientY];
         let delta = [this.lastMousePos[0] - pos[0], this.lastMousePos[1] - pos[1]];
 
-        this.transform.rotate(Math.sign(delta[0]), 1, 0.01);
-        this.transform.rotate(Math.sign(delta[1]), 0, 0.02);
+        this.transform.rotate(Math.sign(delta[0]), 1, 0.04);
+        this.transform.rotate(Math.sign(delta[1]), 0, 0.04);
 
         this.lastMousePos = pos;
     }

@@ -24,6 +24,8 @@ let shaders = {
 let frameBuffer;
 let rightHeadlightBuffer;
 let leftHeadlightBuffer;
+let cubeMapFrameBuffers = [];
+let reflectionMap = createCubeMap(9, gl);
 
 // Delta time
 let lastUpdate = Date.now();
@@ -41,6 +43,7 @@ function init() {
     frameBuffer = new FrameBuffer(shadowMapSize[0], shadowMapSize[1]);
     rightHeadlightBuffer = new FrameBuffer(shadowMapSize[0], shadowMapSize[1]);
     leftHeadlightBuffer = new FrameBuffer(shadowMapSize[0], shadowMapSize[1]);
+    cubeMapFrameBuffer(9, viewportSize.x, viewportSize.y);
 
     let cube = new Cube();
     let cubeMesh = new Mesh({
@@ -221,10 +224,11 @@ function run() {
     gl.enable(gl.DEPTH_TEST);
     shadowPass();
     headlightsPass();
+    reflectionPass(car.model.localTransform.translation);
 
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
-    testQuad();
     render();
+    //testCube();
 
     window.requestAnimationFrame(run);
 }
@@ -284,17 +288,51 @@ function shadowPass() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 }
 
-function render(depthShader, lightMatrix) {    
+function reflectionPass(pos) {
+    // Maybe use a fake camera object 
+	let view_transform = glMatrix.mat4.create();
+    gl.viewport(0, 0, 512, 512);
+
+    let offsets = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+    let up = [[0, -1, 0], [0, -1, 0], [0, 0, -1], [0, 0, 1], [0, -1, 0], [0, -1, 0]];
+    let clearColors = [[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1], [1, 1, 0, 1], [1, 0, 1, 1], [0, 1, 1, 1]];
+    var faces = [ 	gl.TEXTURE_CUBE_MAP_POSITIVE_X,gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+        gl.TEXTURE_CUBE_MAP_POSITIVE_Y,gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+        gl.TEXTURE_CUBE_MAP_POSITIVE_Z,gl.TEXTURE_CUBE_MAP_NEGATIVE_Z];
+
+        
+    pos = pos.slice();
+
+    for (let i=0; i<6; i++) {
+        view_transform = glMatrix.mat4.create();
+
+        glMatrix.mat4.lookAt(view_transform, pos, [pos[0]+offsets[i][0],pos[1]+offsets[i][1],pos[2]+offsets[i][2]],up[i]);
+        glMatrix.mat4.invert(currReflectionsMapView, view_transform);
+        currReflectionsMapView = view_transform.slice();
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, cubeMapFrameBuffers[i]);
+        gl.clearColor(clearColors[i][0],clearColors[i][1],clearColors[i][2],1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        render(undefined, undefined, true);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+    
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP,null);
+}
+
+function render(depthShader, lightMatrix, reflections) {    
     if (!depthShader) {
-        drawSkybox();
+        drawSkybox(reflections);
     }
 
     for (let i=0; i<models.length; i++) {
-        models[i].render(camera, spotLights, depthShader, lightMatrix);
+        models[i].render(camera, spotLights, depthShader, lightMatrix, reflections);
     }
 }
 
-function drawSkybox() {
+function drawSkybox(reflections) {
     shaders.skybox.use();
 
     gl.activeTexture(gl.TEXTURE0);
@@ -302,7 +340,7 @@ function drawSkybox() {
     shaders.skybox.setTexture("u_Cubemap", skybox.texture);
     
     gl.depthMask(false);
-    skyboxCube.render(camera, spotLights);
+    skyboxCube.render(camera, spotLights, undefined, undefined, reflections);
     gl.depthMask(true);
 
     shaders.skybox.unuse();
@@ -317,12 +355,30 @@ function testQuad() {
 
     let texture = new Texture(undefined);
     texture.id = leftHeadlightBuffer.colorTexture;
-    texture.texUnit = 4;
+    texture.texUnit = 9;
     texture.tilingFactor = 1.0;
     let mesh = new Mesh({vertices: vertices, indices: indices, texCoords: texCoords}, 2);
     let model = new Model({mesh:mesh, shader: shaders.basic});
 
-    model.render(camera, undefined, undefined, createDirectionalLightMatrix(rightHeadlightMatrix));
+    model.render(camera, undefined, undefined, undefined);
+}
+
+function testCube() {
+    shaders.skybox.use();
+
+    gl.activeTexture(gl.TEXTURE9);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, reflectionMap);
+    shaders.skybox.setTexture("u_Cubemap", 9);
+    
+    gl.depthMask(false);
+    skyboxCube.globalTransform.setScale([5, 5, 5]);
+    skyboxCube.render(camera, spotLights, undefined, undefined, true);
+    skyboxCube.globalTransform.setScale([500, 500, 500]);
+    gl.depthMask(true);
+
+    shaders.skybox.unuse();
+    gl.activeTexture(gl.TEXTURE9);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 }
 
 function computeHeadlightMats() {
@@ -352,4 +408,56 @@ function getTexture(path, texUnit, tilingFactor) {
     }
 
     return texture;
+}
+
+function cubeMapFrameBuffer(tu) {
+	gl.activeTexture(gl.TEXTURE0 + tu);
+	gl.bindTexture(gl.TEXTURE_CUBE_MAP, reflectionMap);
+	
+	var faces = [ 	gl.TEXTURE_CUBE_MAP_POSITIVE_X,gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+			gl.TEXTURE_CUBE_MAP_POSITIVE_Y,gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+			gl.TEXTURE_CUBE_MAP_POSITIVE_Z,gl.TEXTURE_CUBE_MAP_NEGATIVE_Z];
+			
+	for(var f = 0; f < 6; ++f){
+		var newframebuffer = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, newframebuffer);
+
+		var renderbuffer = gl.createRenderbuffer();
+		gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 512, 512);
+
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, faces[f], reflectionMap, 0);
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+		
+		var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+		    if (status == gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS) {
+		      console.error("gl.checkFramebufferStatus() returned " + status);
+		    }
+		cubeMapFrameBuffers [f] = newframebuffer;
+	}
+
+	gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+function createCubeMap(tu,gl) {
+	texture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0+tu);
+	gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X,	0, 	gl.RGBA, 512,512,0,	gl.RGBA, 	gl.UNSIGNED_BYTE,null);
+    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 	0, 	gl.RGBA, 512,512,0,	gl.RGBA, 	gl.UNSIGNED_BYTE,null);
+    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 	0, 	gl.RGBA, 512,512,0,	gl.RGBA, 	gl.UNSIGNED_BYTE,null);
+    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 	0, 	gl.RGBA, 512,512,0,	gl.RGBA, 	gl.UNSIGNED_BYTE,null);
+    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 	0, 	gl.RGBA, 512,512,0,	gl.RGBA, 	gl.UNSIGNED_BYTE,null);
+    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 	0, 	gl.RGBA, 512,512,0,	gl.RGBA, 	gl.UNSIGNED_BYTE,null)	
+
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+
+	return texture;
 }

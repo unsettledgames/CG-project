@@ -15,9 +15,16 @@ class Model {
         this.children.push(child);
     }
 
-    render(camera, spotLights, depthShader, lightMatrix) {
-        let view = camera.getView();
-        let proj = camera.getProjection();
+    render(camera, spotLights, depthShader, lightMatrix, reflections) {
+        let view = camera.getView().slice();
+        let projection = camera.getProjection().slice();
+        let inverseView = camera.transform.transform.slice();
+        if (reflections != undefined) {
+            view = currReflectionsMapView.slice();
+            projection = reflectionsProjection.slice();
+            glMatrix.mat4.invert(inverseView, view);
+        }
+
         let cameraPos = camera.transform.getTranslation();
 
         if (!depthShader) {
@@ -25,7 +32,8 @@ class Model {
             this.shader.use();
             // Send uniforms
             this.shader.setMat4("u_ViewMatrix", view);
-            this.shader.setMat4("u_ProjectionMatrix", proj);
+            this.shader.setMat4("u_InverseView", inverseView);
+            this.shader.setMat4("u_ProjectionMatrix", projection);
             this.shader.setMat4("u_ModelTransform", this.globalTransform.getTransform());
             this.shader.setMat4("u_LeftHeadlightView", leftHeadlightMatrix);
             this.shader.setMat4("u_RightHeadlightView", rightHeadlightMatrix);
@@ -50,6 +58,11 @@ class Model {
             gl.activeTexture(gl.TEXTURE8);
             gl.bindTexture(gl.TEXTURE_2D, rightHeadlightBuffer.colorTexture);
             this.shader.setTexture("u_RightHeadlightShadows", 8);
+
+            // Submit reflection map
+            gl.activeTexture(gl.TEXTURE9);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, reflectionMap);
+            this.shader.setTexture("u_ReflectionMap", 9);
 
             headlightTexture.bind();
             this.shader.setTexture("u_HeadlightTexture", headlightTexture.texUnit);

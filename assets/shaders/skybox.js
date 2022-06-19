@@ -23,6 +23,7 @@ void main(void)
 {
     vec3 pos = v_Position;
     pos.y = -pos.y;
+    pos.x = pos.x;
 
     gl_FragColor = textureCube(u_Cubemap, pos);
 } `;

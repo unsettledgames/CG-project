@@ -39,6 +39,11 @@ uniform vec3 u_EnvLightDir;
 uniform vec3 u_AmbientLight;
 uniform float u_SpecularStrength;
 
+uniform mat4 u_ViewMatrix;
+uniform mat4 u_InverseView;
+uniform samplerCube u_ReflectionMap;
+uniform mat4 u_ModelTransform;
+
 varying vec2 v_TexCoords;
 varying vec3 v_Normal;
 varying vec3 v_FragPos;
@@ -64,5 +69,8 @@ void main()
 
     reflected = vec3(spec, spec, spec);
 
-    gl_FragColor = texColor * vec4(u_AmbientLight + diffuse + specular, 1.0);
+    vec3 ReflectedRay = normalize((vec4(reflect(-viewDirection, normalize(v_Normal)),0.0)).xyz);
+    vec3 ReflectedColor = textureCube(u_ReflectionMap, ReflectedRay).xyz;	
+
+    gl_FragColor =  vec4(ReflectedColor, 1.0) * 0.2 + texColor * vec4(u_AmbientLight + diffuse + specular, 1.0);
 }`;

@@ -15,6 +15,11 @@ let ambientLight = [0.4, 0.4, 0.4];
 let specularStrength = 0.5;
 let assetCache = {};
 
+let currReflectionsMapView = glMatrix.mat4.create();
+let prevReflectionsMapView;
+let skyboxView;
+let reflectionsProjection = glMatrix.mat4.perspective(glMatrix.mat4.create(), Math.PI / 4, 1.0, 0.1, 2000);
+
 //ambientLight = [0.0, 0.0, 0.0];
 
 gl.getExtension('OES_standard_derivatives');
