@@ -35,9 +35,6 @@ class DayNightCycle {
             this.lightColorKeyframes[this.currSource], this.lightColorKeyframes[this.currDestination], 
             this.currLerpFactor);
 
-        console.log(this.currLightColor);
-        console.log(this.currSource, this.currDestination);
-
         // Update factor and change destinations
         this.currLerpFactor += dt * this.speed;
         if (this.currLerpFactor > 0.999999) {
