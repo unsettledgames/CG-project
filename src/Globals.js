@@ -22,8 +22,6 @@ let reflectionsProjection = glMatrix.mat4.perspective(glMatrix.mat4.create(), Ma
 
 let dayNightCycle = new DayNightCycle(0.00005);
 
-//ambientLight = [0.0, 0.0, 0.0];
-
 gl.getExtension('OES_standard_derivatives');
 gl.getExtension("EXT_frag_depth");
 gl.getExtension('WEBGL_depth_texture');

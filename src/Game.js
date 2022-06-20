@@ -229,7 +229,6 @@ function run() {
 
     gl.viewport(0, 0, viewportSize.x, viewportSize.y);
     render();
-    //testCube();
 
     window.requestAnimationFrame(run);
 }
@@ -346,39 +345,6 @@ function drawSkybox(reflections) {
 
     shaders.skybox.unuse();
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
-}
-
-function testQuad() {
-    let vertices = new Float32Array([0, 0, 0, 0, 16, 0, 16, 0, 0, 16, 16, 0]);
-    let indices = new Uint16Array([0, 2, 1, 1, 2, 3]);
-    let texCoords = new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]);
-
-    let texture = new Texture(undefined);
-    texture.id = leftHeadlightBuffer.colorTexture;
-    texture.texUnit = 9;
-    texture.tilingFactor = 1.0;
-    let mesh = new Mesh({vertices: vertices, indices: indices, texCoords: texCoords}, 2);
-    let model = new Model({mesh:mesh, shader: shaders.basic});
-
-    model.render(camera, undefined, undefined, undefined);
-}
-
-function testCube() {
-    shaders.skybox.use();
-
-    gl.activeTexture(gl.TEXTURE9);
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, reflectionMap);
-    shaders.skybox.setTexture("u_Cubemap", 9);
-    
-    gl.depthMask(false);
-    skyboxCube.globalTransform.setScale([5, 5, 5]);
-    skyboxCube.render(camera, spotLights, undefined, undefined, true);
-    skyboxCube.globalTransform.setScale([500, 500, 500]);
-    gl.depthMask(true);
-
-    shaders.skybox.unuse();
-    gl.activeTexture(gl.TEXTURE9);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 }
 
