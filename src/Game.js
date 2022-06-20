@@ -217,6 +217,7 @@ function run() {
 
     car.update(dt);
     camera.update(dt);
+    dayNightCycle.update(dt);
 
     computeHeadlightMats();
     updateTransformStack(car.model, glMatrix.mat4.create());
@@ -281,7 +282,7 @@ function shadowPass() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     shaders.depth.use();
-    let lightMatrix = createDirectionalLightMatrix(envLightDir);
+    let lightMatrix = createDirectionalLightMatrix(dayNightCycle.getLightDirection());
     render(shaders.depth, lightMatrix);
     shaders.depth.unuse();
 

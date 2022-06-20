@@ -38,10 +38,11 @@ class Model {
             this.shader.setMat4("u_LeftHeadlightView", leftHeadlightMatrix);
             this.shader.setMat4("u_RightHeadlightView", rightHeadlightMatrix);
             this.shader.setMat4("u_HeadlightProj", headlightsProjection);
-            this.shader.setMat4("u_LightMatrix", createDirectionalLightMatrix(envLightDir));
+            this.shader.setMat4("u_LightMatrix", createDirectionalLightMatrix(dayNightCycle.getLightDirection()));
             this.shader.setVec4("u_Color", new Float32Array([1.0, 1.0, 1.0, 1.0]));
-            this.shader.setVec3("u_AmbientLight", new Float32Array(ambientLight));
-            this.shader.setVec3("u_EnvLightDir", new Float32Array(envLightDir));
+            this.shader.setVec3("u_AmbientLight", new Float32Array(dayNightCycle.getAmbientLightIntensity()));
+            this.shader.setVec3("u_LightColor", new Float32Array(dayNightCycle.getLightColour()));
+            this.shader.setVec3("u_EnvLightDir", new Float32Array(dayNightCycle.getLightDirection()));
             this.shader.setFloat("u_SpecularStrength", specularStrength);
             this.shader.setVec3("u_CameraPosition", new Float32Array(cameraPos));
             if (spotLights != undefined)this.shader.setVec3Array("u_SpotLights", spotLights);

@@ -7,7 +7,7 @@ let texCoordsIndex = 1;
 let normalIndex = 2;
 let tangentIndex = 3;
 
-let shadowMapMultiplier = 2;
+let shadowMapMultiplier = 3;
 let shadowMapSize = [viewportSize.x * shadowMapMultiplier, viewportSize.y * shadowMapMultiplier];
 
 let envLightDir = [40, 40, 0];
@@ -19,6 +19,8 @@ let currReflectionsMapView = glMatrix.mat4.create();
 let prevReflectionsMapView;
 let skyboxView;
 let reflectionsProjection = glMatrix.mat4.perspective(glMatrix.mat4.create(), Math.PI / 4, 1.0, 0.1, 2000);
+
+let dayNightCycle = new DayNightCycle(0.00005);
 
 //ambientLight = [0.0, 0.0, 0.0];
 

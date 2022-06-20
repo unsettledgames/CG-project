@@ -71,6 +71,7 @@ uniform vec3 u_AmbientLight;
 uniform float u_SpecularStrength;
 uniform vec3 u_SpotLights[12];
 uniform vec3 u_EnvLightDir;
+uniform vec3 u_LightColor;
 
 // Headlights
 uniform mat4 u_HeadlightProj;
@@ -129,11 +130,12 @@ void main()
 
     // LIGHTING
     vec3 finalLight = phong(normal, v_ViewDirTS, v_LightDirTS, 1.0);
+    vec3 spotLights = vec3(0.0);
     for (int i=0; i<12; i++) {
         vec3 lightDir = normalize(vec3(0.0, -1.0, 0.0));
         vec3 toLight = normalize(u_SpotLights[i] - v_FragPos);
         float dotProduct = dot(toLight, -lightDir);
-        finalLight += vec3(1.0, 1.0, 1.0) * getAttenuation(dotProduct);
+        spotLights += vec3(1.0, 1.0, 1.0) * getAttenuation(dotProduct);
     }
 
     // SHADOWS
@@ -156,7 +158,7 @@ void main()
 
     vec4 rightHeadlightCol, leftHeadlightCol; 
 
-    float slopeDependentBias = clamp(0.005 * tan(acos(dot(v_Normal, u_EnvLightDir))), 0.005, 0.01);
+    float slopeDependentBias = clamp(0.01 * tan(acos(dot(v_Normal, u_EnvLightDir))), 0.01, 0.01);
 
     if (headlightRightTexCoords.x >= 0.0 && headlightRightTexCoords.x <= 1.0 
         && headlightRightTexCoords.y >= 0.0 && headlightRightTexCoords.y <= 1.0
@@ -176,6 +178,6 @@ void main()
             leftHeadlightCol = texture2D(u_HeadlightTexture, headlightLeftTexCoords.xy);
     }
 
-    gl_FragColor = texColor * vec4(finalLight * light_contr + ((rightHeadlightCol.rgb * rightHeadlightCol.a) + (leftHeadlightCol.rgb * leftHeadlightCol.a)), 1.0);
+    gl_FragColor = texColor * vec4(u_LightColor * finalLight * light_contr + spotLights +  ((rightHeadlightCol.rgb * rightHeadlightCol.a) + (leftHeadlightCol.rgb * leftHeadlightCol.a)), 1.0);
     //gl_FragColor = vec4(storedDepth, storedDepth, storedDepth, 1.0);
 }`;

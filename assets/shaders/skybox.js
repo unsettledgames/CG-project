@@ -17,6 +17,8 @@ let skyboxFrag = `
 precision highp float;
 
 uniform  samplerCube  u_Cubemap;	
+uniform vec3 u_AmbientLight;
+uniform vec3 u_LightColor;
 varying vec3 v_Position;		
 
 void main(void)									 
@@ -25,5 +27,7 @@ void main(void)
     pos.y = -pos.y;
     pos.x = pos.x;
 
-    gl_FragColor = textureCube(u_Cubemap, pos);
+    float t = (u_AmbientLight.r - 0.15) / 0.25;
+
+    gl_FragColor =  textureCube(u_Cubemap, pos) * vec4(vec3(mix(0.1, 1.0, t)) * u_LightColor, 1.0);
 } `;
