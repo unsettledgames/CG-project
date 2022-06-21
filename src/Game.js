@@ -223,6 +223,8 @@ function run() {
     updateTransformStack(car.model, glMatrix.mat4.create());
 
     gl.enable(gl.DEPTH_TEST);
+    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
+
     shadowPass();
     headlightsPass();
     reflectionPass(car.model.localTransform.translation);
@@ -247,7 +249,6 @@ function headlightsPass() {
     
     // Right headlight
     gl.bindFramebuffer(gl.FRAMEBUFFER, rightHeadlightBuffer.frameBuffer);
-    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
     gl.clearColor(0.0, 1.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -276,7 +277,6 @@ function shadowPass() {
     gl.clearDepth(1.0);
     
     gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer.frameBuffer);
-    gl.viewport(0, 0, shadowMapSize[0], shadowMapSize[1]);
     gl.clearColor(0.0, 1.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 

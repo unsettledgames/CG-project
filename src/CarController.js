@@ -67,12 +67,15 @@ class CarController {
         wheels.push(...this.frontWheels);
         wheels.push(...this.backWheels);
         for (let i=0; i<wheels.length; i++) {
-            wheels[i].localTransform.rotate(1, 0, this.currSpeed * dt / 32);
+            wheels[i].localTransform.rotate(-1, 0, this.currSpeed * dt / 8);
         }
 
         // Rotate front wheels if necessary
         for (let i=0; i<this.frontWheels.length; i++) {
-            this.backWheels[i].localTransform.rotation[1] = this.currRotationSpeed / 16;
+            let mul = 1;
+            if (!this.goingForwards)
+                mul = -1;
+            this.backWheels[i].localTransform.rotation[1] = this.currRotationSpeed * 128 * mul;
         }
     }
 }

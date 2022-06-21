@@ -8,4 +8,4 @@ let leftHeadlightOrigin = [-0.95, 1, -1, 1];
 let rightHeadlightOrigin = [0.95, 1, -1, 1];
 
 let leftHeadlightMatrix, rightHeadlightMatrix;
-let headlightsProjection = glMatrix.mat4.perspective(glMatrix.mat4.create(), Math.PI / 5, 1.2, 0.1, 20)
+let headlightsProjection = glMatrix.mat4.perspective(glMatrix.mat4.create(), Math.PI / 5, 1.2, 1, 20)
