@@ -3,7 +3,7 @@ class DayNightCycle {
         this.speed = speed;
         this.ambientLightKeyframes = [0.4, 0.4, 0.4, 0.4, 0.4];
         this.lightDirectionKeyframes = [[1,0,0], [1, 1,0], [1,1,0], [1, 0.7, 0], [1,0,0]];
-        this.lightColorKeyframes = [[0.1,0.1,0.2], [0.6,0.4,0.1],[1.0,1.0,1.0],[0.6,0.4,0.1], [0.1,0.1,0.2]];
+        this.lightColorKeyframes = [[0.1,0.1,0.2], [0.7,0.4,0.2],[1.0,1.0,1.0],[0.6,0.4,0.1], [0.1,0.1,0.2]];
         
         this.currSource = 2;
         this.currDestination = 3;
